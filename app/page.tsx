@@ -91,26 +91,11 @@ export default function RegistrationPage() {
 
       {/* ── HERO ── */}
       <div style={{ position: 'relative', width: '100%', height: '100vh', maxHeight: 620, overflow: 'hidden' }}>
-        {/* Placeholder de imagem — substitua por <img src="/banner.jpg"> */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(135deg, #0d1b2a 0%, #1a0a2e 40%, #0d1b0d 100%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          {/* Cruz decorativa */}
-          <div style={{ position: 'absolute', opacity: 0.04 }}>
-            <svg width="400" height="400" viewBox="0 0 400 400" fill="white">
-              <rect x="175" y="40" width="50" height="320" rx="8"/>
-              <rect x="60" y="155" width="280" height="50" rx="8"/>
-            </svg>
-          </div>
-          {/* Glow */}
-          <div style={{
-            position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
-            width: 500, height: 300,
-            background: 'radial-gradient(ellipse, rgba(100,160,255,0.12) 0%, transparent 70%)',
-          }} />
-        </div>
+        <img
+          src="/banner.jpg"
+          alt="Sião 2025"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+        />
 
         {/* Gradiente escurecendo pra baixo */}
         <div style={{
