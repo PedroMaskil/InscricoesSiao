@@ -114,7 +114,7 @@ export default function RegistrationPage() {
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 0' }}>
           <img
             src="/banner.jpeg"
-            alt="Light House 2026"
+            alt="LightHouse 2026"
             style={{
               width: '100%', maxWidth: 860,
               height: 'auto', display: 'block',

@@ -63,7 +63,7 @@ export default function CaravanaPage() {
       {/* Header */}
       <div style={{ textAlign: 'center', padding: '64px 24px 48px' }}>
         <p style={{ fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c084fc', marginBottom: 14, fontWeight: 500 }}>
-          Light House 2026 · 25–27 de Junho
+          LightHouse 2026 · 25–27 de Junho
         </p>
         <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.2rem, 6vw, 3.5rem)', fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: 1.1 }}>
           Inscrição de Caravana

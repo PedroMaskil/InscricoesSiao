@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Inscrições - LightHouse 2026',
-  description: 'Garanta sua vaga no Light House 2026',
+  description: 'Garanta sua vaga no LightHouse 2026',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -69,7 +69,7 @@ export default function AdminPage() {
     const doc = new jsPDF()
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(16)
-    doc.text('Inscritos Individuais — Light House 2026', 14, 18)
+    doc.text('Inscritos Individuais — LightHouse 2026', 14, 18)
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} · Total: ${individuals.length} inscritos`, 14, 26)
@@ -101,7 +101,7 @@ export default function AdminPage() {
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c084fc', marginBottom: 4 }}>Painel de Check-in</p>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', fontWeight: 700 }}>Light House 2026</h1>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', fontWeight: 700 }}>LightHouse 2026</h1>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={exportPDF} style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 10, padding: '8px 18px', color: '#c084fc', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
