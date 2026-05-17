@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Registration {
+  id              String    @id @default(uuid())
+  name            String
+  email           String
+  phone           String
+  cpf             String
+  source          String?
+  cep             String?
+  city            String?
+  isMember        Boolean   @default(false) @map("is_member")
+  priceTier       String    @map("price_tier")
+  amount          Int
+  status          String    @default("pending")
+  stripeSessionId String?   @map("stripe_session_id")
+  paidAt          DateTime? @map("paid_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([email])
+  @@index([status])
+  @@index([isMember, status])
+  @@map("registrations")
+}
