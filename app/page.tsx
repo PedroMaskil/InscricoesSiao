@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { isCepMaringa, formatCep, calcPriceTier, PRICES, EVENT } from '@/lib/pricing'
+import { CalendarDays, Clock, MapPin, ClipboardList } from 'lucide-react'
 
 type FormData = {
   name: string
@@ -90,91 +91,75 @@ export default function RegistrationPage() {
     <main style={{ minHeight: '100vh', background: '#080612', fontFamily: 'Outfit, sans-serif' }}>
 
       {/* ── HERO ── */}
-      <div style={{ position: 'relative', width: '100%', height: '100vh', maxHeight: 640, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
+
+        {/* Fundo: mesma imagem com blur */}
         <img
           src="/banner.jpeg"
-          alt="Light House 2026"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
+          aria-hidden="true"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover',
+            filter: 'blur(4px)',
+            transform: 'scale(1.12)',
+            opacity: 0.55,
+          }}
         />
+        {/* Escurece o fundo borrado */}
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,6,18,0.6)' }} />
 
-        {/* Overlay escuro suave sobre a imagem inteira */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'rgba(8,6,18,0.45)',
-        }} />
+        {/* Imagem principal centralizada */}
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 0' }}>
+          <img
+            src="/banner.jpeg"
+            alt="Light House 2026"
+            style={{
+              width: '100%', maxWidth: 860,
+              height: 'auto', display: 'block',
+              borderRadius: 16,
+              boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            }}
+          />
 
-        {/* Gradiente forte escurecendo de baixo para cima */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: '75%',
-          background: 'linear-gradient(to bottom, transparent, #080612)',
-        }} />
+          {/* Gradiente que funde a imagem com o fundo da página */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
+            background: 'linear-gradient(to bottom, transparent, #080612)',
+            borderRadius: '0 0 16px 16px',
+          }} />
+        </div>
 
         {/* Logo / Igreja */}
-        <div style={{ position: 'absolute', top: 28, left: 28 }}>
+        <div style={{ position: 'absolute', top: 28, left: 28, zIndex: 2 }}>
           <p style={{ fontSize: '0.78rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
             Igreja Batista Sião · Maringá
           </p>
-        </div>
-
-        {/* Conteúdo hero — centralizado com flexbox */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          textAlign: 'center', padding: '0 28px 56px',
-        }}>
-          <div style={{
-            display: 'inline-block',
-            background: 'rgba(139,92,246,0.15)',
-            border: '1px solid rgba(139,92,246,0.3)',
-            borderRadius: 100, padding: '5px 16px', marginBottom: 14,
-            fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase',
-            color: '#c084fc', fontWeight: 600,
-          }}>
-            25 · 26 · 27 de Junho de 2025
-          </div>
-
-          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.95rem', marginBottom: 28 }}>
-            Igreja Batista Sião · Maringá, PR
-          </p>
-
-          <button
-            onClick={() => setShowForm(true)}
-            style={{
-              background: 'linear-gradient(135deg, #7c3aed, #9333ea)',
-              color: '#fff', border: 'none', borderRadius: 100,
-              padding: '14px 36px', fontSize: '0.95rem', fontWeight: 700,
-              cursor: 'pointer', letterSpacing: '0.04em',
-              boxShadow: '0 8px 32px rgba(124,58,237,0.4)',
-              transition: 'all 0.25s ease',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
-            onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
-          >
-            Garantir minha vaga
-          </button>
         </div>
       </div>
 
       {/* ── DETALHES DO EVENTO ── */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 0' }}>
 
-        {/* Info cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 48 }}>
-          {[
-            { icon: '📅', label: 'Datas', value: '25, 26 e 27 de Junho' },
-            { icon: '🕐', label: 'Horários', value: 'Qui/Sex 20h–22h · Sáb 16h–21h' },
-            { icon: '📍', label: 'Local', value: 'Igreja Batista Sião, Maringá' },
-            { icon: '⏰', label: 'Inscrições até', value: '21 de Junho' },
-          ].map(item => (
-            <div key={item.label} style={{
-              background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: 14, padding: '18px 20px',
-            }}>
-              <p style={{ fontSize: '1.3rem', marginBottom: 8 }}>{item.icon}</p>
-              <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{item.label}</p>
-              <p style={{ fontSize: '0.88rem', color: '#fff', fontWeight: 500, lineHeight: 1.4 }}>{item.value}</p>
-            </div>
-          ))}
+        {/* Info texto */}
+        <div style={{ marginBottom: 48 }}>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, color: '#fff', marginBottom: 24 }}>
+            Conferência LightHouse 2026
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { icon: <CalendarDays size={17} />, label: 'Data', value: '25, 26 e 27 de Junho' },
+              { icon: <Clock size={17} />,        label: 'Horários', value: 'Qui/Sex 20h–22h · Sáb 16h–21h' },
+              { icon: <MapPin size={17} />,       label: 'Local', value: 'Igreja Batista Sião, Maringá' },
+              { icon: <ClipboardList size={17} />,label: 'Período de Inscrição', value: 'Até 21 de Junho' },
+            ].map(item => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.95rem' }}>
+                <span style={{ color: '#c084fc', flexShrink: 0, display: 'flex' }}>{item.icon}</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)', marginRight: 4 }}>{item.label}:</span>
+                <span style={{ color: '#fff', fontWeight: 500 }}>{item.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Tabela de lotes */}
