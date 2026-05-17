@@ -12,26 +12,23 @@
     "db:generate": "prisma generate"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
-    "@prisma/adapter-neon": "^7.8.0",
-    "@prisma/client": "^5.14.0",
-    "@stripe/stripe-js": "^3.4.1",
-    "@supabase/supabase-js": "^2.43.4",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
-    "react-hook-form": "^7.51.5",
     "stripe": "^15.7.0",
-    "ws": "^8.20.1"
+    "@stripe/stripe-js": "^3.4.1",
+    "@supabase/supabase-js": "^2.43.4",
+    "@prisma/client": "^5.14.0",
+    "react-hook-form": "^7.51.5"
   },
   "devDependencies": {
+    "prisma": "^5.14.0",
+    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "autoprefixer": "^10",
-    "postcss": "^8",
-    "prisma": "^5.14.0",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "postcss": "^8",
+    "autoprefixer": "^10"
   }
 }

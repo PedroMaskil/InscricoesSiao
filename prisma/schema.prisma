@@ -1,3 +1,9 @@
+// ─── Prisma Schema ────────────────────────────────────────
+// Após qualquer alteração aqui, rode:
+//   npx prisma migrate dev --name descricao-da-mudanca
+// Para aplicar em produção:
+//   npx prisma migrate deploy
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -23,10 +29,31 @@ model Registration {
   status          String    @default("pending")
   stripeSessionId String?   @map("stripe_session_id")
   paidAt          DateTime? @map("paid_at")
+  checkedIn       Boolean   @default(false) @map("checked_in")
+  checkedInAt     DateTime? @map("checked_in_at")
   createdAt       DateTime  @default(now()) @map("created_at")
 
   @@index([email])
   @@index([status])
   @@index([isMember, status])
   @@map("registrations")
+}
+
+model Caravan {
+  id           String    @id @default(uuid())
+  city         String
+  church       String
+  leader       String
+  leaderPhone  String    @map("leader_phone")
+  peopleCount  Int       @map("people_count")
+  listFileUrl  String?   @map("list_file_url")
+  listFileName String?   @map("list_file_name")
+  status       String    @default("confirmed")
+  checkedIn    Boolean   @default(false) @map("checked_in")
+  checkedInAt  DateTime? @map("checked_in_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([city])
+  @@index([status])
+  @@map("caravans")
 }
