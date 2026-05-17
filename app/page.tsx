@@ -127,7 +127,7 @@ export default function RegistrationPage() {
 
         {/* Conteúdo hero */}
         <div style={{
-          position: 'absolute', bottom: 48, left: 0, right: 0,
+          position: 'absolute', bottom: 48, right: 0,
           padding: '0 28px', maxWidth: 700, margin: '0 auto',
           textAlign: 'center', left: '50%', transform: 'translateX(-50%)',
         }}>
