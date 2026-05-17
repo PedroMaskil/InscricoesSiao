@@ -25,7 +25,10 @@ export async function POST(req: NextRequest) {
       const db = supabaseAdmin()
       const bytes    = await file.arrayBuffer()
       const buffer   = Buffer.from(bytes)
-      const fileName = `caravanas/${Date.now()}-${file.name.replace(/\s/g, '_')}`
+      const safeName = file.name
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-zA-Z0-9._-]/g, '_')
+      const fileName = `caravanas/${Date.now()}-${safeName}`
 
       const { data, error } = await db.storage
         .from('event-files')
