@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import jsQR from 'jsqr'
 
 type Caravan = {
   id: string; city: string; church: string; leader: string
@@ -23,14 +24,26 @@ const TIER_LABELS: Record<string, string> = {
 }
 
 export default function AdminPage() {
-  const [tab, setTab]             = useState<'caravans' | 'individuals'>('caravans')
+  const [tab, setTab]             = useState<'caravans' | 'individuals' | 'scanner'>('caravans')
   const [caravans, setCaravans]   = useState<Caravan[]>([])
   const [individuals, setIndividuals] = useState<Individual[]>([])
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState('')
   const [pdfModal, setPdfModal]   = useState<string | null>(null)
 
+  // Scanner state
+  const [scanning, setScanning]       = useState(false)
+  const [scanResult, setScanResult]   = useState<Individual | null>(null)
+  const [scanError, setScanError]     = useState<string | null>(null)
+  const [checkinDone, setCheckinDone] = useState(false)
+  const videoRef   = useRef<HTMLVideoElement>(null)
+  const canvasRef  = useRef<HTMLCanvasElement>(null)
+  const rafRef     = useRef<number | null>(null)
+  const individualsRef = useRef<Individual[]>([])
+
+  useEffect(() => { individualsRef.current = individuals }, [individuals])
   useEffect(() => { fetchData() }, [])
+  useEffect(() => { if (tab !== 'scanner') stopScanner() }, [tab])
 
   const fetchData = async () => {
     setLoading(true)
@@ -50,6 +63,77 @@ export default function AdminPage() {
     fetchData()
   }
 
+  // ── Scanner ──────────────────────────────────────────────
+  const startScanner = async () => {
+    setScanResult(null)
+    setScanError(null)
+    setCheckinDone(false)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+      })
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+        setScanning(true)
+        requestAnimationFrame(scanFrame)
+      }
+    } catch {
+      setScanError('Não foi possível acessar a câmera. Verifique as permissões do navegador.')
+    }
+  }
+
+  const stopScanner = () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    rafRef.current = null
+    if (videoRef.current?.srcObject) {
+      ;(videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop())
+      videoRef.current.srcObject = null
+    }
+    setScanning(false)
+  }
+
+  const scanFrame = () => {
+    const video  = videoRef.current
+    const canvas = canvasRef.current
+    if (!video || !canvas) return
+    if (video.readyState < 2) {
+      rafRef.current = requestAnimationFrame(scanFrame)
+      return
+    }
+    canvas.width  = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(video, 0, 0)
+    const img  = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const code = jsQR(img.data, img.width, img.height)
+    if (code) {
+      const raw = code.data
+      const id  = raw.includes('/checkin/') ? raw.split('/checkin/')[1].split('?')[0] : raw
+      const found = individualsRef.current.find(i => i.id === id)
+      if (found) {
+        setScanResult(found)
+        stopScanner()
+        return
+      } else {
+        setScanError('QR inválido ou inscrito não encontrado.')
+      }
+    }
+    rafRef.current = requestAnimationFrame(scanFrame)
+  }
+
+  const confirmCheckin = async () => {
+    if (!scanResult) return
+    await toggleCheckin(scanResult.id, 'individual')
+    setCheckinDone(true)
+    setScanResult(null)
+    setTimeout(() => {
+      setCheckinDone(false)
+      startScanner()
+    }, 2500)
+  }
+
+  // ── Filters ──────────────────────────────────────────────
   const filteredCaravans    = caravans.filter(c =>
     c.city.toLowerCase().includes(search.toLowerCase()) ||
     c.church.toLowerCase().includes(search.toLowerCase()) ||
@@ -131,20 +215,24 @@ export default function AdminPage() {
 
       {/* Search + Tabs */}
       <div style={{ padding: '24px 28px 0', display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-        <input
-          type="text" placeholder="Buscar por nome, cidade, CPF..."
-          value={search} onChange={e => setSearch(e.target.value)}
-          style={{ flex: 1, minWidth: 200, background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', color: '#fff', fontFamily: 'Outfit, sans-serif', fontSize: '0.88rem', outline: 'none' }}
-        />
+        {tab !== 'scanner' && (
+          <input
+            type="text" placeholder="Buscar por nome, cidade, CPF..."
+            value={search} onChange={e => setSearch(e.target.value)}
+            style={{ flex: 1, minWidth: 200, background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', color: '#fff', fontFamily: 'Outfit, sans-serif', fontSize: '0.88rem', outline: 'none' }}
+          />
+        )}
         <div style={{ display: 'flex', gap: 8 }}>
-          {(['caravans', 'individuals'] as const).map(t => (
+          {(['caravans', 'individuals', 'scanner'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)} style={{
               padding: '9px 20px', borderRadius: 100, border: 'none', cursor: 'pointer',
               fontFamily: 'Outfit, sans-serif', fontSize: '0.82rem', fontWeight: 600,
               background: tab === t ? 'linear-gradient(135deg, #7c3aed, #7b5ea7)' : 'rgba(255,255,255,0.06)',
               color: '#fff', transition: 'all 0.2s',
             }}>
-              {t === 'caravans' ? `Caravanas (${caravans.length})` : `Individuais (${individuals.length})`}
+              {t === 'caravans'    ? `Caravanas (${caravans.length})`
+              : t === 'individuals' ? `Individuais (${individuals.length})`
+              : '📷 Scanner'}
             </button>
           ))}
         </div>
@@ -154,6 +242,117 @@ export default function AdminPage() {
       <div style={{ padding: '20px 28px 60px' }}>
         {loading ? (
           <p style={{ color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '60px 0' }}>Carregando...</p>
+
+        ) : tab === 'scanner' ? (
+
+          /* ── SCANNER ── */
+          <div style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+            {/* Video feed */}
+            <div style={{
+              position: 'relative', borderRadius: 16, overflow: 'hidden',
+              background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.08)',
+              aspectRatio: '1', marginBottom: 20,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <video
+                ref={videoRef}
+                muted
+                playsInline
+                style={{
+                  width: '100%', height: '100%', objectFit: 'cover',
+                  display: scanning ? 'block' : 'none',
+                }}
+              />
+              {!scanning && (
+                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>
+                  <p style={{ fontSize: '3rem', marginBottom: 12 }}>📷</p>
+                  <p>Câmera inativa</p>
+                </div>
+              )}
+              {scanning && (
+                <div style={{
+                  position: 'absolute', inset: 0, pointerEvents: 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <div style={{
+                    width: '55%', aspectRatio: '1',
+                    border: '2px solid #c084fc', borderRadius: 12,
+                    boxShadow: '0 0 0 9999px rgba(8,6,18,0.55)',
+                  }} />
+                </div>
+              )}
+            </div>
+
+            {/* Result card */}
+            {checkinDone && (
+              <div style={{ background: 'rgba(79,200,120,0.1)', border: '1px solid rgba(79,200,120,0.3)', borderRadius: 14, padding: '20px', marginBottom: 20 }}>
+                <p style={{ fontSize: '2rem', marginBottom: 8 }}>✓</p>
+                <p style={{ color: '#4fc878', fontWeight: 700, fontSize: '1.1rem' }}>Check-in confirmado!</p>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', marginTop: 4 }}>Próximo scan em instantes...</p>
+              </div>
+            )}
+
+            {scanResult && !checkinDone && (
+              <div style={{ background: '#0f0a1a', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 14, padding: '20px', marginBottom: 20 }}>
+                <p style={{ fontSize: '0.72rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>Inscrito encontrado</p>
+                <p style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 4 }}>{scanResult.name}</p>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', marginBottom: 4 }}>{scanResult.email}</p>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>
+                    {TIER_LABELS[scanResult.priceTier] || scanResult.priceTier}
+                  </span>
+                  <span style={{ background: 'rgba(79,200,120,0.1)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#4fc878', fontWeight: 600 }}>
+                    R$ {(scanResult.amount / 100).toFixed(0)}
+                  </span>
+                  {scanResult.checkedIn && (
+                    <span style={{ background: 'rgba(251,191,36,0.1)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#fbbf24', fontWeight: 600 }}>
+                      Já fez check-in
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button onClick={() => { setScanResult(null); startScanner() }} style={{
+                    flex: 1, padding: '12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer',
+                    fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem',
+                  }}>
+                    Cancelar
+                  </button>
+                  <button onClick={confirmCheckin} style={{
+                    flex: 2, padding: '12px', borderRadius: 10, border: 'none',
+                    background: scanResult.checkedIn ? 'rgba(251,191,36,0.2)' : 'linear-gradient(135deg,#7c3aed,#9333ea)',
+                    color: '#fff', cursor: 'pointer', fontWeight: 700,
+                    fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem',
+                  }}>
+                    {scanResult.checkedIn ? 'Confirmar mesmo assim' : 'Confirmar Check-in'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {scanError && (
+              <p style={{ color: '#f87171', fontSize: '0.82rem', marginBottom: 16 }}>{scanError}</p>
+            )}
+
+            <button
+              onClick={scanning ? stopScanner : startScanner}
+              style={{
+                width: '100%', padding: '14px', borderRadius: 12,
+                border: scanning ? '1px solid rgba(248,113,113,0.3)' : 'none',
+                background: scanning
+                  ? 'rgba(248,113,113,0.15)'
+                  : 'linear-gradient(135deg,#7c3aed,#9333ea)',
+                color: scanning ? '#f87171' : '#fff',
+                fontSize: '1rem', fontWeight: 700, cursor: 'pointer',
+                fontFamily: 'Outfit, sans-serif',
+              } as React.CSSProperties}
+            >
+              {scanning ? '■ Parar câmera' : '▶ Iniciar scanner'}
+            </button>
+          </div>
+
         ) : tab === 'caravans' ? (
 
           /* ── CARAVANAS ── */
@@ -167,7 +366,6 @@ export default function AdminPage() {
                 display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                 transition: 'all 0.2s',
               }}>
-                {/* Check-in button */}
                 <button onClick={() => toggleCheckin(c.id, 'caravan')} style={{
                   width: 36, height: 36, borderRadius: '50%', border: 'none', flexShrink: 0,
                   background: c.checkedIn ? '#4fc878' : 'rgba(255,255,255,0.08)',
@@ -178,7 +376,6 @@ export default function AdminPage() {
                   {c.checkedIn ? '✓' : '○'}
                 </button>
 
-                {/* Info */}
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <p style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: 3 }}>
                     {c.church} <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>— {c.city}</span>
@@ -193,13 +390,11 @@ export default function AdminPage() {
                   )}
                 </div>
 
-                {/* People count */}
                 <div style={{ textAlign: 'center', padding: '8px 14px', background: 'rgba(255,255,255,0.05)', borderRadius: 10 }}>
                   <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.4rem', fontWeight: 700, lineHeight: 1 }}>{c.peopleCount}</p>
                   <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>pessoas</p>
                 </div>
 
-                {/* PDF */}
                 {c.listFileUrl && (
                   <button onClick={() => setPdfModal(c.listFileUrl!)} style={{
                     background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.25)',

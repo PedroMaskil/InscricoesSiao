@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       })
 
       await sendConfirmationEmail({
+        id:     registration.id,
         name:   registration.name,
         email:  registration.email,
         amount: registration.amount,

@@ -3,13 +3,17 @@ import { Resend } from 'resend'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function sendConfirmationEmail(params: {
+  id: string
   name: string
   email: string
   amount: number
 }) {
-  const { name, email, amount } = params
+  const { id, name, email, amount } = params
   const firstName = name.split(' ')[0]
   const valor = (amount / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://inscricoes.batistasiao.org.br'
+  const checkinUrl = `${baseUrl}/checkin/${id}`
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(checkinUrl)}&margin=10`
 
   await resend.emails.send({
     from: 'LightHouse 2026 <noreply@inscricoes.batistasiao.org.br>',
@@ -39,6 +43,15 @@ export async function sendConfirmationEmail(params: {
         <tr><td style="padding:24px 40px 0;text-align:center;">
           <h2 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#fff;">Inscrição confirmada, ${firstName}!</h2>
           <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.5);line-height:1.6;">Seu pagamento de <strong style="color:#c084fc;">${valor}</strong> foi processado com sucesso.</p>
+        </td></tr>
+
+        <!-- QR Code -->
+        <tr><td style="padding:0 40px 8px;text-align:center;">
+          <p style="margin:0 0 12px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Seu QR Code de check-in</p>
+          <div style="display:inline-block;background:#fff;border-radius:12px;padding:10px;">
+            <img src="${qrImageUrl}" width="180" height="180" alt="QR Code" style="display:block;" />
+          </div>
+          <p style="margin:10px 0 0;font-size:12px;color:rgba(255,255,255,0.35);">Apresente este QR code na entrada do evento</p>
         </td></tr>
 
         <!-- Detalhes do evento -->
