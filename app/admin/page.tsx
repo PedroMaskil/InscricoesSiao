@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 type Caravan = {
   id: string; city: string; church: string; leader: string
@@ -63,6 +65,35 @@ export default function AdminPage() {
   const individualsChecked = individuals.filter(i => i.checkedIn).length
   const totalPeople        = caravans.reduce((s, c) => s + c.peopleCount, 0)
 
+  const exportPDF = () => {
+    const doc = new jsPDF()
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(16)
+    doc.text('Inscritos Individuais — Light House 2026', 14, 18)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} · Total: ${individuals.length} inscritos`, 14, 26)
+
+    autoTable(doc, {
+      startY: 32,
+      head: [['Nome', 'E-mail', 'Telefone', 'CPF', 'Cidade', 'Valor', 'Check-in']],
+      body: individuals.map(i => [
+        i.name,
+        i.email,
+        i.phone,
+        i.cpf,
+        i.city || '—',
+        `R$ ${(i.amount / 100).toFixed(0)}`,
+        i.checkedIn ? `✓ ${new Date(i.checkedInAt!).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : '—',
+      ]),
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [124, 58, 237], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 245, 250] },
+    })
+
+    doc.save(`inscritos-lighthouse-2026-${new Date().toISOString().slice(0,10)}.pdf`)
+  }
+
   return (
     <main style={{ minHeight: '100vh', background: '#080612', fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
 
@@ -72,9 +103,14 @@ export default function AdminPage() {
           <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c084fc', marginBottom: 4 }}>Painel de Check-in</p>
           <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', fontWeight: 700 }}>Light House 2026</h1>
         </div>
-        <button onClick={fetchData} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 18px', color: '#fff', cursor: 'pointer', fontSize: '0.82rem' }}>
-          ↻ Atualizar
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={exportPDF} style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 10, padding: '8px 18px', color: '#c084fc', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
+            ↓ Exportar PDF
+          </button>
+          <button onClick={fetchData} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 18px', color: '#fff', cursor: 'pointer', fontSize: '0.82rem' }}>
+            ↻ Atualizar
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
