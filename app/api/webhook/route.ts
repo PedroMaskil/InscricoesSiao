@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { sendConfirmationEmail } from '@/lib/email'
 import Stripe from 'stripe'
 
 export async function POST(req: NextRequest) {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     const registrationId = session.metadata?.registration_id
 
     if (registrationId) {
-      await prisma.registration.update({
+      const registration = await prisma.registration.update({
         where: { id: registrationId },
         data: {
           status: 'confirmed',
@@ -28,6 +29,12 @@ export async function POST(req: NextRequest) {
           paidAt: new Date(),
         },
       })
+
+      await sendConfirmationEmail({
+        name:   registration.name,
+        email:  registration.email,
+        amount: registration.amount,
+      }).catch(err => console.error('Email error:', err))
     }
   }
 
