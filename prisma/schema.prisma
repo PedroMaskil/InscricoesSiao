@@ -24,6 +24,8 @@ model Registration {
   cep             String?
   city            String?
   isMember        Boolean   @default(false) @map("is_member")
+  isOtherMember   Boolean   @default(false) @map("is_other_member")
+  otherChurch     String?   @map("other_church")
   priceTier       String    @map("price_tier")
   amount          Int
   status          String    @default("pending")

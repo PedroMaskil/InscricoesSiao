@@ -34,6 +34,7 @@ function formatMoney(cents: number) {
 }
 
 export default function RegistrationPage() {
+  const [isMember, setIsMember]         = useState(false)
   const [isOtherMember, setIsOtherMember] = useState(false)
   const [otherChurch, setOtherChurch]   = useState('')
   const [cepCity, setCepCity]           = useState('')
@@ -65,7 +66,7 @@ export default function RegistrationPage() {
 
   const isMaringa    = isCepMaringa(watchedCep)
   const previewTier  = watchedCep.replace(/\D/g, '').length === 8
-    ? calcPriceTier({ isMaringa, isMember: false, memberCount: 0 })
+    ? calcPriceTier({ isMaringa, isMember, memberCount: 0 })
     : null
   const previewPrice = previewTier ? PRICES[previewTier] : null
 
@@ -76,7 +77,7 @@ export default function RegistrationPage() {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, isMember: false, city: cepCity, isOtherMember, otherChurch: isOtherMember ? otherChurch : null }),
+        body: JSON.stringify({ ...data, isMember, city: cepCity, isOtherMember, otherChurch: isOtherMember ? otherChurch : null }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Erro desconhecido')
@@ -144,36 +145,56 @@ export default function RegistrationPage() {
 
         {/* Info texto */}
         <div style={{ marginBottom: 48 }}>
-          <h2 style={{ fontFamily: "'Nunito', sans-serif", fontSize: '2.2rem', fontWeight: 900, color: '#fff', marginBottom: 24, letterSpacing: '-0.01em' }}>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, color: '#fff', marginBottom: 24 }}>
             Conferência LightHouse 2026
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {[
               { icon: <CalendarDays size={17} />, label: 'Data', value: '25, 26 e 27 de Junho' },
               { icon: <Clock size={17} />,        label: 'Horários', value: 'Qui/Sex 20h–22h · Sáb 16h–21h' },
-              { icon: <MapPin size={17} />,       label: 'Local', value: 'Igreja Batista Sião, Maringá', address: 'R. Manoel de Macedo, 37 - Zona 7', maps: 'https://maps.google.com/?q=R.+Manoel+de+Macedo,+37,+Zona+7,+Maringá,+PR' },
+              { icon: <MapPin size={17} />,       label: 'Local', value: 'Igreja Batista Sião, Maringá' },
               { icon: <ClipboardList size={17} />,label: 'Período de Inscrição', value: 'Até 21 de Junho' },
-            ].map((item: any) => (
-              <div key={item.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: '0.95rem' }}>
-                <span style={{ color: '#c084fc', flexShrink: 0, display: 'flex', marginTop: 2 }}>{item.icon}</span>
-                <div>
-                  <span style={{ color: 'rgba(255,255,255,0.5)', marginRight: 4 }}>{item.label}:</span>
-                  <span style={{ color: '#fff', fontWeight: 500 }}>{item.value}</span>
-                  {item.address && (
-                    <div style={{ marginTop: 3 }}>
-                      <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)' }}>{item.address} · </span>
-                      <a href={item.maps} target="_blank" rel="noreferrer"
-                        style={{ fontSize: '0.8rem', color: '#c084fc', textDecoration: 'none', fontWeight: 500 }}>
-                        Ver no Maps ↗
-                      </a>
-                    </div>
-                  )}
-                </div>
+            ].map(item => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.95rem' }}>
+                <span style={{ color: '#c084fc', flexShrink: 0, display: 'flex' }}>{item.icon}</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)', marginRight: 4 }}>{item.label}:</span>
+                <span style={{ color: '#fff', fontWeight: 500 }}>{item.value}</span>
               </div>
             ))}
           </div>
         </div>
 
+        {/* Tabela de lotes */}
+        <div style={{ marginBottom: 48 }}>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.6rem', fontWeight: 700, marginBottom: 20, color: '#fff' }}>
+            Valores
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              { label: 'Fora de Maringá',           value: 'R$ 40', desc: 'CEP fora de Maringá' },
+              { label: 'Maringá / Membro 1º lote',  value: 'R$ 60', desc: 'Primeiras 50 vagas de membro ou não-membro de Maringá', highlight: true },
+              { label: 'Membro — 2º lote',          value: 'R$ 70', desc: 'Após as 50 vagas do 1º lote' },
+              { label: 'Membro — Lote final',       value: 'R$ 80', desc: 'Após 14 de junho' },
+            ].map(item => (
+              <div key={item.label} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: item.highlight ? 'rgba(124,58,237,0.07)' : '#111',
+                border: `1px solid ${item.highlight ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.06)'}`,
+                borderRadius: 12, padding: '14px 20px', gap: 12,
+              }}>
+                <div>
+                  <p style={{ fontSize: '0.88rem', fontWeight: 600, color: '#fff', marginBottom: 2 }}>{item.label}</p>
+                  <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{item.desc}</p>
+                </div>
+                <p style={{
+                  fontFamily: 'Cormorant Garamond, serif',
+                  fontSize: '1.5rem', fontWeight: 700, flexShrink: 0,
+                  color: item.highlight ? '#c084fc' : 'rgba(255,255,255,0.7)',
+                }}>{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* CTA botão */}
         <div style={{ textAlign: 'center', paddingBottom: 64 }}>
@@ -204,6 +225,23 @@ export default function RegistrationPage() {
               Preencha os dados abaixo para garantir sua vaga
             </p>
 
+            {/* Toggle membro */}
+            <div
+              onClick={() => setIsMember(!isMember)}
+              style={{
+                background: isMember ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isMember ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                borderRadius: 14, padding: '16px 18px', marginBottom: 5,
+                cursor: 'pointer', transition: 'all 0.25s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                <input type="checkbox" className="custom-check" checked={isMember} onChange={e => setIsMember(e.target.checked)} style={{ marginTop: 2 }} />
+                <div>
+                  <p style={{ fontWeight: 600, fontSize: '0.92rem', marginBottom: 0, color: '#fff' }}>Sou membro da Igreja Batista Sião</p>
+                </div>
+              </div>
+            </div>
 
             {/* Toggle membro de outra igreja */}
             <div

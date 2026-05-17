@@ -6,7 +6,7 @@ import { calcPriceTier, PRICES, isCepMaringa, EVENT } from '@/lib/pricing'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, email, phone, cpf, source, cep, city, isMember } = body
+    const { name, email, phone, cpf, source, cep, city, isMember, isOtherMember, otherChurch } = body
 
     if (!name || !email || !phone || !cpf || !cep) {
       return NextResponse.json({ error: 'Campos obrigatórios faltando.' }, { status: 400 })
@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
         source: source || null,
         cep, city: city || null,
         isMember,
+        isOtherMember: isOtherMember || false,
+        otherChurch: isOtherMember ? (otherChurch || null) : null,
         priceTier: tier,
         amount: priceInfo.amount,
         status: 'pending',
