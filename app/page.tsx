@@ -152,7 +152,7 @@ export default function RegistrationPage() {
               { icon: <CalendarDays size={17} />, label: 'Data', value: '25, 26 e 27 de Junho' },
               { icon: <Clock size={17} />,        label: 'Horários', value: 'Qui/Sex 20h–22h · Sáb 16h–21h' },
               { icon: <MapPin size={17} />,       label: 'Local', value: 'Igreja Batista Sião, Maringá', address: 'R. Manoel de Macedo, 37 - Zona 7', maps: 'https://maps.google.com/?q=R.+Manoel+de+Macedo,+37,+Zona+7,+Maringá,+PR' },
-              { icon: <ClipboardList size={17} />,label: 'Período de Inscrição', value: 'Até 21 de Junho' },
+              { icon: <ClipboardList size={17} />,label: 'Período de Inscrição', value: 'Até 25 de Junho' },
             ].map((item: any) => (
               <div key={item.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: '0.95rem' }}>
                 <span style={{ color: '#c084fc', flexShrink: 0, display: 'flex', marginTop: 2 }}>{item.icon}</span>
@@ -346,7 +346,7 @@ export default function RegistrationPage() {
                 </button>
 
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 20, flexWrap: 'wrap', marginTop: 4 }}>
-                  {['🔒 Pagamento seguro', '⏰ Inscrições até 21/06', '💳 Pix · Cartão'].map(t => (
+                  {['🔒 Pagamento seguro', '⏰ Inscrições até 25/06', '💳 Pix · Cartão'].map(t => (
                     <span key={t} style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>{t}</span>
                   ))}
                 </div>

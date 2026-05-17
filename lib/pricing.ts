@@ -3,7 +3,7 @@ export const EVENT = {
   name:          'Light House 2026',
   dates:         '25, 26 e 27 de junho',
   schedule:      'Qui e Sex: 20h–22h · Sáb: 16h–21h',
-  registrationDeadline: new Date('2026-06-21T23:59:59-03:00'),
+  registrationDeadline: new Date('2026-06-25T23:59:59-03:00'),
   member2ndLoteCutoff:  new Date('2026-06-14T23:59:59-03:00'), // após essa data: R$80
   member1stLoteLimit:   50, // primeiras 50 vagas de membro = R$60
 }
