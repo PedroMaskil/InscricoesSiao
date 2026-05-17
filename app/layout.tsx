@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Inscrições — Light House 2026',
+  title: 'Inscrições - LightHouse 2026',
   description: 'Garanta sua vaga no Light House 2026',
 }
 
