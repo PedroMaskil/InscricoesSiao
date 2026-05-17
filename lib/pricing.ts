@@ -1,6 +1,6 @@
 // ─── Configurações do evento ──────────────────────────────
 export const EVENT = {
-  name:          'Sião 2025',
+  name:          'Light House 2026',
   dates:         '25, 26 e 27 de junho',
   schedule:      'Qui e Sex: 20h–22h · Sáb: 16h–21h',
   registrationDeadline: new Date('2025-06-21T23:59:59-03:00'),

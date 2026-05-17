@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Inscrições — Evento',
-  description: 'Garanta sua vaga no evento',
+  title: 'Inscrições — Light House 2026',
+  description: 'Garanta sua vaga no Light House 2026',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

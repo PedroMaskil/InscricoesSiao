@@ -5,14 +5,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap');
 
 :root {
-  --gold: #C9A84C;
-  --gold-light: #e8c97a;
-  --dark: #0c0c0c;
-  --dark-2: #141414;
-  --dark-3: #1c1c1c;
+  --accent: #7c3aed;
+  --accent-2: #9333ea;
+  --accent-light: #c084fc;
+  --dark: #080612;
+  --dark-2: #0f0a1a;
+  --dark-3: #160e2a;
   --cream: #f2ede4;
   --muted: #7a7a7a;
-  --border: rgba(201,168,76,0.18);
+  --border: rgba(124,58,237,0.22);
 }
 
 * { box-sizing: border-box; }
@@ -47,15 +48,15 @@ h1, h2, h3 {
   position: relative;
 }
 .custom-check:checked {
-  background: var(--gold);
-  border-color: var(--gold);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 .custom-check:checked::after {
   content: '';
   position: absolute;
   left: 5px; top: 2px;
   width: 6px; height: 10px;
-  border: 2px solid #0c0c0c;
+  border: 2px solid #080612;
   border-top: none; border-left: none;
   transform: rotate(45deg);
 }
@@ -76,10 +77,10 @@ select {
   transition: border-color 0.2s;
 }
 input:focus, select:focus {
-  border-color: var(--gold);
+  border-color: var(--accent);
 }
 input::placeholder { color: var(--muted); }
-select option { background: #1c1c1c; }
+select option { background: #160e2a; }
 
 label.field-label {
   display: block;

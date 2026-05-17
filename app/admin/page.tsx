@@ -64,13 +64,13 @@ export default function AdminPage() {
   const totalPeople        = caravans.reduce((s, c) => s + c.peopleCount, 0)
 
   return (
-    <main style={{ minHeight: '100vh', background: '#080808', fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
+    <main style={{ minHeight: '100vh', background: '#080612', fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
 
       {/* Header */}
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7eb8ff', marginBottom: 4 }}>Painel de Check-in</p>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', fontWeight: 700 }}>Sião 2025</h1>
+          <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c084fc', marginBottom: 4 }}>Painel de Check-in</p>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', fontWeight: 700 }}>Light House 2026</h1>
         </div>
         <button onClick={fetchData} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 18px', color: '#fff', cursor: 'pointer', fontSize: '0.82rem' }}>
           ↻ Atualizar
@@ -85,7 +85,7 @@ export default function AdminPage() {
           { label: 'Individuais',        value: individuals.length,                     sub: `${individualsChecked} fizeram check-in` },
           { label: 'Total geral',        value: individuals.length + caravans.length,   sub: 'inscrições' },
         ].map(s => (
-          <div key={s.label} style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 20px' }}>
+          <div key={s.label} style={{ background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 20px' }}>
             <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{s.label}</p>
             <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, lineHeight: 1, marginBottom: 4 }}>{s.value}</p>
             <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>{s.sub}</p>
@@ -98,14 +98,14 @@ export default function AdminPage() {
         <input
           type="text" placeholder="Buscar por nome, cidade, CPF..."
           value={search} onChange={e => setSearch(e.target.value)}
-          style={{ flex: 1, minWidth: 200, background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', color: '#fff', fontFamily: 'Outfit, sans-serif', fontSize: '0.88rem', outline: 'none' }}
+          style={{ flex: 1, minWidth: 200, background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', color: '#fff', fontFamily: 'Outfit, sans-serif', fontSize: '0.88rem', outline: 'none' }}
         />
         <div style={{ display: 'flex', gap: 8 }}>
           {(['caravans', 'individuals'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)} style={{
               padding: '9px 20px', borderRadius: 100, border: 'none', cursor: 'pointer',
               fontFamily: 'Outfit, sans-serif', fontSize: '0.82rem', fontWeight: 600,
-              background: tab === t ? 'linear-gradient(135deg, #4f8ef7, #7b5ea7)' : 'rgba(255,255,255,0.06)',
+              background: tab === t ? 'linear-gradient(135deg, #7c3aed, #7b5ea7)' : 'rgba(255,255,255,0.06)',
               color: '#fff', transition: 'all 0.2s',
             }}>
               {t === 'caravans' ? `Caravanas (${caravans.length})` : `Individuais (${individuals.length})`}
@@ -166,8 +166,8 @@ export default function AdminPage() {
                 {/* PDF */}
                 {c.listFileUrl && (
                   <button onClick={() => setPdfModal(c.listFileUrl!)} style={{
-                    background: 'rgba(79,142,247,0.12)', border: '1px solid rgba(79,142,247,0.25)',
-                    borderRadius: 10, padding: '8px 14px', color: '#7eb8ff',
+                    background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.25)',
+                    borderRadius: 10, padding: '8px 14px', color: '#c084fc',
                     fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0,
                     fontFamily: 'Outfit, sans-serif',
                   }}>
@@ -215,7 +215,7 @@ export default function AdminPage() {
 
                 <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
                   {i.isMember && (
-                    <span style={{ background: 'rgba(79,142,247,0.12)', border: '1px solid rgba(79,142,247,0.25)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#7eb8ff', fontWeight: 600 }}>
+                    <span style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#c084fc', fontWeight: 600 }}>
                       Membro
                     </span>
                   )}
@@ -238,11 +238,11 @@ export default function AdminPage() {
           onClick={() => setPdfModal(null)}
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
         >
-          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 800, height: '80vh', background: '#111', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 800, height: '80vh', background: '#0f0a1a', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>Lista de participantes</p>
               <div style={{ display: 'flex', gap: 10 }}>
-                <a href={pdfModal} target="_blank" rel="noreferrer" style={{ background: 'rgba(79,142,247,0.15)', border: '1px solid rgba(79,142,247,0.3)', borderRadius: 8, padding: '6px 14px', color: '#7eb8ff', fontSize: '0.78rem', textDecoration: 'none', fontWeight: 600 }}>
+                <a href={pdfModal} target="_blank" rel="noreferrer" style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 8, padding: '6px 14px', color: '#c084fc', fontSize: '0.78rem', textDecoration: 'none', fontWeight: 600 }}>
                   ↗ Abrir em nova aba
                 </a>
                 <button onClick={() => setPdfModal(null)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8, padding: '6px 12px', color: '#fff', cursor: 'pointer', fontSize: '0.85rem' }}>✕</button>

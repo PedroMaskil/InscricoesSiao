@@ -43,8 +43,8 @@ export default function CaravanaPage() {
   }
 
   if (success) return (
-    <main style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'Outfit, sans-serif' }}>
-      <div style={{ maxWidth: 440, width: '100%', textAlign: 'center', background: '#111', border: '1px solid rgba(79,142,247,0.2)', borderRadius: 20, padding: '52px 36px' }}>
+    <main style={{ minHeight: '100vh', background: '#080612', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'Outfit, sans-serif' }}>
+      <div style={{ maxWidth: 440, width: '100%', textAlign: 'center', background: '#0f0a1a', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 20, padding: '52px 36px' }}>
         <div style={{ fontSize: '3rem', marginBottom: 20 }}>✦</div>
         <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, color: '#fff', marginBottom: 12 }}>
           Caravana registrada!
@@ -58,17 +58,17 @@ export default function CaravanaPage() {
   )
 
   return (
-    <main style={{ minHeight: '100vh', background: '#0a0a0a', padding: '0 0 80px', fontFamily: 'Outfit, sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: '#080612', padding: '0 0 80px', fontFamily: 'Outfit, sans-serif' }}>
 
       {/* Header */}
       <div style={{ textAlign: 'center', padding: '64px 24px 48px' }}>
-        <p style={{ fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#7eb8ff', marginBottom: 14, fontWeight: 500 }}>
-          Sião 2025 · 25–27 de Junho
+        <p style={{ fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c084fc', marginBottom: 14, fontWeight: 500 }}>
+          Light House 2026 · 25–27 de Junho
         </p>
         <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.2rem, 6vw, 3.5rem)', fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: 1.1 }}>
           Inscrição de Caravana
         </h1>
-        <div style={{ width: 48, height: 2, background: 'linear-gradient(90deg, transparent, #4f8ef7, transparent)', margin: '20px auto' }} />
+        <div style={{ width: 48, height: 2, background: 'linear-gradient(90deg, transparent, #7c3aed, transparent)', margin: '20px auto' }} />
         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', maxWidth: 400, margin: '0 auto', lineHeight: 1.7 }}>
           Registre sua caravana com os dados do grupo e anexe a lista de participantes em PDF.
         </p>
@@ -76,7 +76,7 @@ export default function CaravanaPage() {
 
       {/* Form card */}
       <div style={{ maxWidth: 540, margin: '0 auto', padding: '0 20px' }}>
-        <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '40px 36px' }}>
+        <div style={{ background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '40px 36px' }}>
 
           <form onSubmit={handleSubmit} noValidate>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -123,10 +123,10 @@ export default function CaravanaPage() {
                 <div
                   onClick={() => document.getElementById('file-input')?.click()}
                   style={{
-                    border: `2px dashed ${file ? 'rgba(79,142,247,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                    border: `2px dashed ${file ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.1)'}`,
                     borderRadius: 12, padding: '24px 20px',
                     textAlign: 'center', cursor: 'pointer',
-                    background: file ? 'rgba(79,142,247,0.05)' : 'transparent',
+                    background: file ? 'rgba(124,58,237,0.05)' : 'transparent',
                     transition: 'all 0.2s',
                   }}
                 >
@@ -138,7 +138,7 @@ export default function CaravanaPage() {
                   {file ? (
                     <>
                       <p style={{ fontSize: '1.5rem', marginBottom: 6 }}>📄</p>
-                      <p style={{ fontSize: '0.85rem', color: '#7eb8ff', fontWeight: 500 }}>{file.name}</p>
+                      <p style={{ fontSize: '0.85rem', color: '#c084fc', fontWeight: 500 }}>{file.name}</p>
                       <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
                         {(file.size / 1024).toFixed(0)} KB · clique para trocar
                       </p>
@@ -165,11 +165,11 @@ export default function CaravanaPage() {
 
               <button type="submit" disabled={loading} style={{
                 width: '100%', padding: '16px 24px', borderRadius: 100, border: 'none',
-                background: loading ? 'rgba(79,142,247,0.3)' : 'linear-gradient(135deg, #4f8ef7, #7b5ea7)',
+                background: loading ? 'rgba(124,58,237,0.3)' : 'linear-gradient(135deg, #7c3aed, #9333ea)',
                 color: '#fff', fontFamily: 'Outfit, sans-serif',
                 fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.04em',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                boxShadow: loading ? 'none' : '0 4px 24px rgba(79,142,247,0.3)',
+                boxShadow: loading ? 'none' : '0 4px 24px rgba(124,58,237,0.3)',
                 transition: 'all 0.25s ease', marginTop: 8,
               }}>
                 {loading ? 'Enviando...' : 'Registrar caravana →'}

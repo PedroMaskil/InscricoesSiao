@@ -87,20 +87,26 @@ export default function RegistrationPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#0a0a0a', fontFamily: 'Outfit, sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: '#080612', fontFamily: 'Outfit, sans-serif' }}>
 
       {/* ── HERO ── */}
-      <div style={{ position: 'relative', width: '100%', height: '100vh', maxHeight: 620, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', height: '100vh', maxHeight: 640, overflow: 'hidden' }}>
         <img
-          src="/banner.jpg"
-          alt="Sião 2025"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+          src="/banner.jpeg"
+          alt="Light House 2026"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
         />
 
-        {/* Gradiente escurecendo pra baixo */}
+        {/* Overlay escuro suave sobre a imagem inteira */}
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%',
-          background: 'linear-gradient(to bottom, transparent, #0a0a0a)',
+          position: 'absolute', inset: 0,
+          background: 'rgba(8,6,18,0.45)',
+        }} />
+
+        {/* Gradiente forte escurecendo de baixo para cima */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: '75%',
+          background: 'linear-gradient(to bottom, transparent, #080612)',
         }} />
 
         {/* Logo / Igreja */}
@@ -110,31 +116,22 @@ export default function RegistrationPage() {
           </p>
         </div>
 
-        {/* Conteúdo hero */}
+        {/* Conteúdo hero — centralizado com flexbox */}
         <div style={{
-          position: 'absolute', bottom: 48, right: 0,
-          padding: '0 28px', maxWidth: 700, margin: '0 auto',
-          textAlign: 'center', left: '50%', transform: 'translateX(-50%)',
+          position: 'absolute', bottom: 0, left: 0, right: 0,
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          textAlign: 'center', padding: '0 28px 56px',
         }}>
           <div style={{
             display: 'inline-block',
-            background: 'rgba(100,160,255,0.15)',
-            border: '1px solid rgba(100,160,255,0.3)',
-            borderRadius: 100, padding: '5px 16px', marginBottom: 16,
+            background: 'rgba(139,92,246,0.15)',
+            border: '1px solid rgba(139,92,246,0.3)',
+            borderRadius: 100, padding: '5px 16px', marginBottom: 14,
             fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase',
-            color: '#7eb8ff', fontWeight: 600,
+            color: '#c084fc', fontWeight: 600,
           }}>
             25 · 26 · 27 de Junho de 2025
           </div>
-
-          <h1 style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: 'clamp(3rem, 9vw, 6rem)',
-            fontWeight: 700, lineHeight: 1, marginBottom: 12,
-            color: '#fff', letterSpacing: '-0.02em',
-          }}>
-            {EVENT.name}
-          </h1>
 
           <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.95rem', marginBottom: 28 }}>
             Igreja Batista Sião · Maringá, PR
@@ -143,11 +140,11 @@ export default function RegistrationPage() {
           <button
             onClick={() => setShowForm(true)}
             style={{
-              background: 'linear-gradient(135deg, #4f8ef7, #7b5ea7)',
+              background: 'linear-gradient(135deg, #7c3aed, #9333ea)',
               color: '#fff', border: 'none', borderRadius: 100,
               padding: '14px 36px', fontSize: '0.95rem', fontWeight: 700,
               cursor: 'pointer', letterSpacing: '0.04em',
-              boxShadow: '0 8px 32px rgba(79,142,247,0.4)',
+              boxShadow: '0 8px 32px rgba(124,58,237,0.4)',
               transition: 'all 0.25s ease',
             }}
             onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
@@ -170,7 +167,7 @@ export default function RegistrationPage() {
             { icon: '⏰', label: 'Inscrições até', value: '21 de Junho' },
           ].map(item => (
             <div key={item.label} style={{
-              background: '#111', border: '1px solid rgba(255,255,255,0.07)',
+              background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.07)',
               borderRadius: 14, padding: '18px 20px',
             }}>
               <p style={{ fontSize: '1.3rem', marginBottom: 8 }}>{item.icon}</p>
@@ -194,8 +191,8 @@ export default function RegistrationPage() {
             ].map(item => (
               <div key={item.label} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: item.highlight ? 'rgba(79,142,247,0.07)' : '#111',
-                border: `1px solid ${item.highlight ? 'rgba(79,142,247,0.25)' : 'rgba(255,255,255,0.06)'}`,
+                background: item.highlight ? 'rgba(124,58,237,0.07)' : '#111',
+                border: `1px solid ${item.highlight ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.06)'}`,
                 borderRadius: 12, padding: '14px 20px', gap: 12,
               }}>
                 <div>
@@ -205,7 +202,7 @@ export default function RegistrationPage() {
                 <p style={{
                   fontFamily: 'Cormorant Garamond, serif',
                   fontSize: '1.5rem', fontWeight: 700, flexShrink: 0,
-                  color: item.highlight ? '#7eb8ff' : 'rgba(255,255,255,0.7)',
+                  color: item.highlight ? '#c084fc' : 'rgba(255,255,255,0.7)',
                 }}>{item.value}</p>
               </div>
             ))}
@@ -217,11 +214,11 @@ export default function RegistrationPage() {
           <button
             onClick={() => { setShowForm(true); setTimeout(() => document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' }), 100) }}
             style={{
-              background: 'linear-gradient(135deg, #4f8ef7, #7b5ea7)',
+              background: 'linear-gradient(135deg, #7c3aed, #9333ea)',
               color: '#fff', border: 'none', borderRadius: 100,
               padding: '16px 48px', fontSize: '1rem', fontWeight: 700,
               cursor: 'pointer', letterSpacing: '0.04em',
-              boxShadow: '0 8px 32px rgba(79,142,247,0.3)',
+              boxShadow: '0 8px 32px rgba(124,58,237,0.3)',
               width: '100%', maxWidth: 360,
             }}
           >
@@ -232,7 +229,7 @@ export default function RegistrationPage() {
 
       {/* ── FORMULÁRIO ── */}
       {showForm && (
-        <div id="form-section" style={{ background: '#0d0d0d', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px 80px' }}>
+        <div id="form-section" style={{ background: '#0a0815', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px 80px' }}>
           <div style={{ maxWidth: 520, margin: '0 auto' }}>
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, marginBottom: 8, color: '#fff', textAlign: 'center' }}>
               Inscrição
@@ -245,8 +242,8 @@ export default function RegistrationPage() {
             <div
               onClick={() => setIsMember(!isMember)}
               style={{
-                background: isMember ? 'rgba(79,142,247,0.08)' : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${isMember ? 'rgba(79,142,247,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                background: isMember ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isMember ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.08)'}`,
                 borderRadius: 14, padding: '16px 18px', marginBottom: 28,
                 cursor: 'pointer', transition: 'all 0.25s ease',
               }}
@@ -310,7 +307,7 @@ export default function RegistrationPage() {
                     {cepLoading && <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)' }}>buscando...</span>}
                   </div>
                   {cepValid === true && (
-                    <p style={{ fontSize: '0.78rem', color: '#7eb8ff', marginTop: 5 }}>
+                    <p style={{ fontSize: '0.78rem', color: '#c084fc', marginTop: 5 }}>
                       📍 {cepCity} {isMaringa ? '— Maringá ✓' : '— fora de Maringá'}
                     </p>
                   )}
@@ -333,8 +330,8 @@ export default function RegistrationPage() {
                 {/* Preview preço */}
                 {previewPrice && cepValid === true && (
                   <div style={{
-                    background: 'rgba(79,142,247,0.07)',
-                    border: '1px solid rgba(79,142,247,0.2)',
+                    background: 'rgba(124,58,237,0.07)',
+                    border: '1px solid rgba(124,58,237,0.2)',
                     borderRadius: 12, padding: '14px 18px',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}>
@@ -363,11 +360,11 @@ export default function RegistrationPage() {
                   disabled={loading}
                   style={{
                     width: '100%', padding: '16px 24px', borderRadius: 100, border: 'none',
-                    background: loading ? 'rgba(79,142,247,0.3)' : 'linear-gradient(135deg, #4f8ef7, #7b5ea7)',
+                    background: loading ? 'rgba(124,58,237,0.3)' : 'linear-gradient(135deg, #7c3aed, #9333ea)',
                     color: '#fff', fontFamily: 'Outfit, sans-serif',
                     fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.04em',
                     cursor: loading ? 'not-allowed' : 'pointer',
-                    boxShadow: loading ? 'none' : '0 4px 24px rgba(79,142,247,0.3)',
+                    boxShadow: loading ? 'none' : '0 4px 24px rgba(124,58,237,0.3)',
                     transition: 'all 0.25s ease', marginTop: 8,
                   }}
                 >
