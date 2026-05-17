@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
       if (error) {
         console.error('Upload error:', error)
-        return NextResponse.json({ error: 'Erro ao fazer upload do arquivo.' }, { status: 500 })
+        return NextResponse.json({ error: `Upload falhou: ${error.message}` }, { status: 500 })
       }
 
       const { data: { publicUrl } } = db.storage.from('event-files').getPublicUrl(fileName)
