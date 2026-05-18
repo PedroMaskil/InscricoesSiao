@@ -1,13 +1,62 @@
 import QRCode from 'qrcode'
+import { prisma } from '@/lib/prisma'
+import { sendConfirmationEmail } from '@/lib/email'
 
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: { registration_id?: string }
+  searchParams: {
+    registration_id?: string
+    order_nsu?: string
+    slug?: string
+    transaction_nsu?: string
+  }
 }) {
+  const registrationId = searchParams.registration_id ?? searchParams.order_nsu ?? null
   let qrDataUrl: string | null = null
-  const registrationId = searchParams.registration_id ?? null
 
+  // Verifica pagamento com InfinitePay e confirma inscrição
+  if (registrationId && searchParams.slug && searchParams.transaction_nsu) {
+    try {
+      const checkRes = await fetch('https://api.checkout.infinitepay.io/payment_check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          handle:          process.env.INFINITEPAY_HANDLE!,
+          order_nsu:       registrationId,
+          transaction_nsu: searchParams.transaction_nsu,
+          slug:            searchParams.slug,
+        }),
+      })
+
+      if (checkRes.ok) {
+        const { paid } = await checkRes.json()
+        if (paid) {
+          const reg = await prisma.registration.findUnique({ where: { id: registrationId } })
+          if (reg && reg.status === 'pending') {
+            await prisma.registration.update({
+              where: { id: registrationId },
+              data: {
+                status:          'confirmed',
+                paidAt:          new Date(),
+                stripeSessionId: searchParams.slug,
+              },
+            })
+            await sendConfirmationEmail({
+              id:     reg.id,
+              name:   reg.name,
+              email:  reg.email,
+              amount: reg.amount,
+            }).catch(err => console.error('Email error:', err))
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Payment check error:', err)
+    }
+  }
+
+  // Gera QR code de check-in
   if (registrationId) {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://inscricoes.batistasiao.org.br'
