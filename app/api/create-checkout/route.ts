@@ -63,9 +63,6 @@ export async function POST(req: NextRequest) {
           email:        email,
           phone_number: `+55${phone.replace(/\D/g, '')}`,
         },
-        address: {
-          cep: cep.replace(/\D/g, ''),
-        },
       }),
     })
 
