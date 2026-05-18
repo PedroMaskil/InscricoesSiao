@@ -35,18 +35,18 @@ export async function sendConfirmationEmail(params: {
         </td></tr>
 
         <!-- Ícone check -->
-        <tr><td style="padding:40px 40px 0;text-align:center;">
+        <tr><td style="padding:28px 40px 0;text-align:center;">
           <div style="display:inline-block;width:72px;height:72px;border-radius:50%;background:rgba(79,200,120,0.12);border:2px solid rgba(79,200,120,0.4);line-height:72px;font-size:32px;color:#4fc878;">✓</div>
         </td></tr>
 
         <!-- Título -->
-        <tr><td style="padding:24px 40px 0;text-align:center;">
+        <tr><td style="padding:20px 40px 0;text-align:center;">
           <h2 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#fff;">Inscrição confirmada, ${firstName}!</h2>
           <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.5);line-height:1.6;">Seu pagamento de <strong style="color:#c084fc;">${valor}</strong> foi processado com sucesso.</p>
         </td></tr>
 
         <!-- QR Code -->
-        <tr><td style="padding:0 40px 8px;text-align:center;">
+        <tr><td style="padding:24px 40px 8px;text-align:center;">
           <p style="margin:0 0 12px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Seu QR Code de check-in</p>
           <div style="display:inline-block;background:#fff;border-radius:12px;padding:10px;">
             <img src="${qrImageUrl}" width="180" height="180" alt="QR Code" style="display:block;" />
@@ -55,24 +55,20 @@ export async function sendConfirmationEmail(params: {
         </td></tr>
 
         <!-- Detalhes do evento -->
-        <tr><td style="padding:28px 40px;">
+        <tr><td style="padding:24px 24px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid rgba(255,255,255,0.08);">
-            <tr><td style="padding:20px 24px;">
-              <p style="margin:0 0 14px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Detalhes do evento</p>
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.5);width:110px;">📅 Data</td>
-                  <td style="padding:6px 0;font-size:13px;color:#fff;font-weight:500;">25, 26 e 27 de Junho de 2026</td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.5);">🕗 Horários</td>
-                  <td style="padding:6px 0;font-size:13px;color:#fff;font-weight:500;">Qui/Sex 20h–22h · Sáb 16h–21h</td>
-                </tr>
-                <tr>
-                  <td style="padding:6px 0;font-size:13px;color:rgba(255,255,255,0.5);">📍 Local</td>
-                  <td style="padding:6px 0;font-size:13px;color:#fff;font-weight:500;">Igreja Batista Sião<br><span style="font-weight:400;color:rgba(255,255,255,0.5);">R. Manoel de Macedo, 37 - Zona 7, Maringá</span></td>
-                </tr>
-              </table>
+            <tr><td style="padding:20px 20px;">
+              <p style="margin:0 0 16px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Detalhes do evento</p>
+
+              <p style="margin:0 0 2px;font-size:11px;color:rgba(255,255,255,0.4);">📅 Data</p>
+              <p style="margin:0 12px 0 0;font-size:13px;color:#fff;font-weight:500;">25, 26 e 27 de Junho de 2026</p>
+
+              <p style="margin:12px 0 2px;font-size:11px;color:rgba(255,255,255,0.4);">🕗 Horários</p>
+              <p style="margin:0;font-size:13px;color:#fff;font-weight:500;">Qui/Sex 20h–22h · Sáb 16h–21h</p>
+
+              <p style="margin:12px 0 2px;font-size:11px;color:rgba(255,255,255,0.4);">📍 Local</p>
+              <p style="margin:0;font-size:13px;color:#fff;font-weight:500;">Igreja Batista Sião</p>
+              <p style="margin:2px 0 0;font-size:12px;color:rgba(255,255,255,0.45);">R. Manoel de Macedo, 37 - Zona 7, Maringá</p>
             </td></tr>
           </table>
         </td></tr>
@@ -83,7 +79,11 @@ export async function sendConfirmationEmail(params: {
             Dúvidas? Entre em contato pelo Instagram:
           </p>
           <a href="https://www.instagram.com/vetormaringa" style="color:#c084fc;font-weight:600;font-size:14px;text-decoration:none;">@vetormaringa</a>
-          <p style="margin:24px 0 0;font-size:12px;color:rgba(255,255,255,0.25);">Aguardamos ansiosamente para te receber! 🙏</p>
+          <p style="margin:20px 0 0;font-size:12px;color:rgba(255,255,255,0.35);line-height:1.7;">
+            Para reembolso do ingresso nos contate:<br>
+            <strong style="color:rgba(255,255,255,0.55);">(44) 99960-5447</strong>
+          </p>
+          <p style="margin:20px 0 0;font-size:12px;color:rgba(255,255,255,0.25);">Aguardamos ansiosamente para te receber! 🙏</p>
         </td></tr>
 
       </table>
