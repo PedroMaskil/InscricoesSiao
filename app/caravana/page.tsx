@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { CalendarDays, Clock, MapPin, ClipboardList, Phone } from 'lucide-react'
 
 function formatPhone(v: string) {
   return v.replace(/\D/g, '')
@@ -13,10 +14,10 @@ export default function CaravanaPage() {
   const [form, setForm] = useState({
     city: '', church: '', leader: '', leaderPhone: '', peopleCount: '',
   })
-  const [file, setFile]         = useState<File | null>(null)
-  const [loading, setLoading]   = useState(false)
-  const [success, setSuccess]   = useState(false)
-  const [error, setError]       = useState('')
+  const [file, setFile]       = useState<File | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError]     = useState('')
 
   const update = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }))
 
@@ -45,43 +46,183 @@ export default function CaravanaPage() {
   if (success) return (
     <main style={{ minHeight: '100vh', background: '#080612', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'Outfit, sans-serif' }}>
       <div style={{ maxWidth: 440, width: '100%', textAlign: 'center', background: '#0f0a1a', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 20, padding: '52px 36px' }}>
-        <div style={{ fontSize: '3rem', marginBottom: 20 }}>✦</div>
+        <div style={{ fontSize: '3rem', marginBottom: 20 }}>✓</div>
         <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, color: '#fff', marginBottom: 12 }}>
           Caravana registrada!
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, fontSize: '0.9rem' }}>
           Os dados da sua caravana foram recebidos com sucesso.<br />
-          Entraremos em contato com o líder responsável em breve.
+          Entraremos em contato para alinhar os dados inseridos e a forma de pagamento!<br /><br />
+          Qualquer dúvida estaremos à disposição{' '}
+          <a href="https://wa.me/5544999605447" target="_blank" rel="noreferrer"
+            style={{ color: '#c084fc', fontWeight: 600, textDecoration: 'none' }}>
+            (44) 99960-5447
+          </a>
+          {' '}— Pedro
         </p>
       </div>
     </main>
   )
 
   return (
-    <main style={{ minHeight: '100vh', background: '#080612', padding: '0 0 80px', fontFamily: 'Outfit, sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: '#080612', fontFamily: 'Outfit, sans-serif' }}>
 
-      {/* Header */}
-      <div style={{ textAlign: 'center', padding: '64px 24px 48px' }}>
-        <p style={{ fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c084fc', marginBottom: 14, fontWeight: 500 }}>
-          LightHouse 2026 · 25–27 de Junho
-        </p>
-        <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2.2rem, 6vw, 3.5rem)', fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: 1.1 }}>
-          Inscrição de Caravana
-        </h1>
-        <div style={{ width: 48, height: 2, background: 'linear-gradient(90deg, transparent, #7c3aed, transparent)', margin: '20px auto' }} />
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', maxWidth: 400, margin: '0 auto', lineHeight: 1.7 }}>
-          Registre sua caravana com os dados do grupo e anexe a lista de participantes em PDF.
-        </p>
+      {/* ── HERO ── */}
+      <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
+
+        <img
+          src="/banner.jpeg"
+          aria-hidden="true"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover',
+            filter: 'blur(4px)',
+            transform: 'scale(1.12)',
+            opacity: 0.55,
+          }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,6,18,0.6)' }} />
+
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 0' }}>
+          <img
+            src="/banner.jpeg"
+            alt="LightHouse 2026"
+            style={{
+              width: '100%', maxWidth: 860,
+              height: 'auto', display: 'block',
+              borderRadius: 16,
+              boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            }}
+          />
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
+            background: 'linear-gradient(to bottom, transparent, #080612)',
+            borderRadius: '0 0 16px 16px',
+          }} />
+        </div>
+
+        <div style={{ position: 'absolute', top: 28, left: 28, zIndex: 2 }}>
+          <p style={{ fontSize: '0.78rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
+            Igreja Batista Sião · Maringá
+          </p>
+        </div>
       </div>
 
-      {/* Form card */}
-      <div style={{ maxWidth: 540, margin: '0 auto', padding: '0 20px' }}>
-        <div style={{ background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '40px 36px' }}>
+      {/* ── DETALHES DO EVENTO ── */}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 0' }}>
+
+        <div style={{ marginBottom: 48 }}>
+          <h2 style={{ fontFamily: "'Nunito', sans-serif", fontSize: '2.2rem', fontWeight: 900, color: '#fff', marginBottom: 4, letterSpacing: '-0.01em' }}>
+            Conferência LightHouse 2026
+          </h2>
+          <p style={{ color: '#c084fc', fontSize: '0.9rem', fontWeight: 600, marginBottom: 24 }}>
+            Inscrição de Caravana
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { icon: <CalendarDays size={17} />, label: 'Data',                value: '25, 26 e 27 de Junho' },
+              { icon: <Clock size={17} />,        label: 'Horários',            value: 'Qui/Sex 20h–22h · Sáb 16h–21h' },
+              { icon: <MapPin size={17} />,       label: 'Local',               value: 'Igreja Batista Sião, Maringá', address: 'R. Manoel de Macedo, 37 - Zona 7', maps: 'https://maps.google.com/?q=R.+Manoel+de+Macedo,+37,+Zona+7,+Maringá,+PR' },
+              { icon: <ClipboardList size={17} />,label: 'Período de Inscrição', value: 'Até 25 de Junho' },
+            ].map((item: any) => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: '0.95rem' }}>
+                <span style={{ color: '#c084fc', flexShrink: 0, display: 'flex', marginTop: 2 }}>{item.icon}</span>
+                <div>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', marginRight: 4 }}>{item.label}:</span>
+                  <span style={{ color: '#fff', fontWeight: 500 }}>{item.value}</span>
+                  {item.address && (
+                    <div style={{ marginTop: 3 }}>
+                      <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)' }}>{item.address} · </span>
+                      <a href={item.maps} target="_blank" rel="noreferrer"
+                        style={{ fontSize: '0.8rem', color: '#c084fc', textDecoration: 'none', fontWeight: 500 }}>
+                        Ver no Maps ↗
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Contato */}
+        <div style={{ marginBottom: 56, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Phone size={15} color="#c084fc" style={{ flexShrink: 0 }} />
+          <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+            Dúvidas e suporte:{' '}
+            <a href="https://wa.me/5544999605447" target="_blank" rel="noreferrer"
+              style={{ color: '#fff', fontWeight: 600, textDecoration: 'none' }}>
+              (44) 99960-5447
+            </a>
+            <span style={{ color: 'rgba(255,255,255,0.3)' }}> — Pedro</span>
+          </p>
+        </div>
+      </div>
+
+      {/* ── FORMULÁRIO ── */}
+      <div style={{ background: '#0a0815', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px 80px' }}>
+        <div style={{ maxWidth: 520, margin: '0 auto' }}>
+
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, marginBottom: 8, color: '#fff', textAlign: 'center' }}>
+            Inscrição de Caravana
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.88rem', textAlign: 'center', marginBottom: 36 }}>
+            Registre seu grupo e anexe a lista de participantes em PDF
+          </p>
+
+          {/* Card de preço */}
+          {(() => {
+            const count = parseInt(form.peopleCount) || 0
+            const total = count * 4000
+            return (
+              <div style={{
+                background: 'rgba(124,58,237,0.07)',
+                border: '1px solid rgba(124,58,237,0.25)',
+                borderRadius: 14, padding: '18px 20px',
+                marginBottom: 32,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                  <div>
+                    <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+                      Valor por pessoa
+                    </p>
+                    <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, color: '#fff', lineHeight: 1 }}>
+                      R$ 40,00
+                    </p>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', maxWidth: 160, textAlign: 'right', lineHeight: 1.5 }}>
+                    Preço único para caravanas, independente da cidade de origem
+                  </p>
+                </div>
+
+                {count > 0 && (
+                  <div style={{
+                    marginTop: 14,
+                    paddingTop: 14,
+                    borderTop: '1px solid rgba(124,58,237,0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  }}>
+                    <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)' }}>
+                      {count} {count === 1 ? 'pessoa' : 'pessoas'} × R$ 40,00
+                    </p>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>
+                        Total da inscrição
+                      </p>
+                      <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.6rem', fontWeight: 700, color: '#c084fc', lineHeight: 1 }}>
+                        {(total / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
 
           <form onSubmit={handleSubmit} noValidate>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-              {/* Cidade + Igreja */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 <div>
                   <label className="field-label">Cidade *</label>
@@ -95,14 +236,12 @@ export default function CaravanaPage() {
                 </div>
               </div>
 
-              {/* Líder */}
               <div>
                 <label className="field-label">Líder responsável *</label>
                 <input type="text" placeholder="Nome completo do líder"
                   value={form.leader} onChange={e => update('leader', e.target.value)} />
               </div>
 
-              {/* Telefone líder + Qtd pessoas */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 <div>
                   <label className="field-label">WhatsApp do líder *</label>
@@ -117,7 +256,6 @@ export default function CaravanaPage() {
                 </div>
               </div>
 
-              {/* Upload PDF */}
               <div>
                 <label className="field-label">Lista de participantes (PDF)</label>
                 <div
@@ -179,6 +317,7 @@ export default function CaravanaPage() {
           </form>
         </div>
       </div>
+
     </main>
   )
 }

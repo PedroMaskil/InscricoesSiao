@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { isCepMaringa, formatCep, calcPriceTier, PRICES, EVENT } from '@/lib/pricing'
-import { CalendarDays, Clock, MapPin, ClipboardList } from 'lucide-react'
+import { CalendarDays, Clock, MapPin, ClipboardList, Phone } from 'lucide-react'
 
 type FormData = {
   name: string
@@ -174,6 +174,19 @@ export default function RegistrationPage() {
           </div>
         </div>
 
+
+        {/* Contato */}
+        <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Phone size={15} color="#c084fc" style={{ flexShrink: 0 }} />
+          <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+            Dúvidas e suporte:{' '}
+            <a href="https://wa.me/5544999605447" target="_blank" rel="noreferrer"
+              style={{ color: '#fff', fontWeight: 600, textDecoration: 'none' }}>
+              (44) 99960-5447
+            </a>
+            <span style={{ color: 'rgba(255,255,255,0.3)' }}> — Pedro</span>
+          </p>
+        </div>
 
         {/* CTA botão */}
         <div style={{ textAlign: 'center', paddingBottom: 64 }}>
@@ -349,6 +362,18 @@ export default function RegistrationPage() {
                   {['🔒 Pagamento seguro', '⏰ Inscrições até 25/06', '💳 Pix · Cartão'].map(t => (
                     <span key={t} style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>{t}</span>
                   ))}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 12 }}>
+                  <Phone size={13} color="rgba(192,132,252,0.6)" />
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', margin: 0 }}>
+                    Suporte:{' '}
+                    <a href="https://wa.me/5544999605447" target="_blank" rel="noreferrer"
+                      style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, textDecoration: 'none' }}>
+                      (44) 99960-5447
+                    </a>
+                    {' '}— Pedro
+                  </p>
                 </div>
 
               </div>
