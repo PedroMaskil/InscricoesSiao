@@ -83,14 +83,27 @@ export default function AdminPage() {
     }
   }
 
-  const stopScanner = () => {
+  const pauseScanning = () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
     rafRef.current = null
+  }
+
+  const resumeScanning = () => {
+    setScanResult(null)
+    setScanError(null)
+    setCheckinDone(false)
+    rafRef.current = requestAnimationFrame(scanFrame)
+  }
+
+  const stopScanner = () => {
+    pauseScanning()
     if (videoRef.current?.srcObject) {
       ;(videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop())
       videoRef.current.srcObject = null
     }
     setScanning(false)
+    setScanResult(null)
+    setCheckinDone(false)
   }
 
   const scanFrame = () => {
@@ -113,7 +126,7 @@ export default function AdminPage() {
       const found = individualsRef.current.find(i => i.id === id)
       if (found) {
         setScanResult(found)
-        stopScanner()
+        pauseScanning()   // pausa o loop mas mantém câmera ativa
         return
       } else {
         setScanError('QR inválido ou inscrito não encontrado.')
@@ -127,10 +140,7 @@ export default function AdminPage() {
     await toggleCheckin(scanResult.id, 'individual')
     setCheckinDone(true)
     setScanResult(null)
-    setTimeout(() => {
-      setCheckinDone(false)
-      startScanner()
-    }, 2500)
+    setTimeout(() => resumeScanning(), 1800)
   }
 
   // ── Filters ──────────────────────────────────────────────
@@ -246,94 +256,103 @@ export default function AdminPage() {
         ) : tab === 'scanner' ? (
 
           /* ── SCANNER ── */
-          <div style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
             <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-            {/* Video feed */}
+            {/* Video feed + overlays */}
             <div style={{
-              position: 'relative', borderRadius: 16, overflow: 'hidden',
+              position: 'relative', borderRadius: 20, overflow: 'hidden',
               background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.08)',
-              aspectRatio: '1', marginBottom: 20,
+              aspectRatio: '4/3', marginBottom: 16,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
+              {/* Câmera */}
               <video
                 ref={videoRef}
                 muted
                 playsInline
-                style={{
-                  width: '100%', height: '100%', objectFit: 'cover',
-                  display: scanning ? 'block' : 'none',
-                }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: scanning ? 'block' : 'none' }}
               />
+
+              {/* Placeholder inativo */}
               {!scanning && (
                 <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>
-                  <p style={{ fontSize: '3rem', marginBottom: 12 }}>📷</p>
+                  <p style={{ fontSize: '4rem', marginBottom: 12 }}>📷</p>
                   <p>Câmera inativa</p>
                 </div>
               )}
-              {scanning && (
-                <div style={{
-                  position: 'absolute', inset: 0, pointerEvents: 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
+
+              {/* Mira de scan */}
+              {scanning && !scanResult && !checkinDone && (
+                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{
-                    width: '55%', aspectRatio: '1',
-                    border: '2px solid #c084fc', borderRadius: 12,
-                    boxShadow: '0 0 0 9999px rgba(8,6,18,0.55)',
+                    width: '52%', aspectRatio: '1',
+                    border: '2px solid #c084fc', borderRadius: 16,
+                    boxShadow: '0 0 0 9999px rgba(8,6,18,0.5)',
                   }} />
+                </div>
+              )}
+
+              {/* Overlay — check-in confirmado */}
+              {checkinDone && (
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'rgba(8,6,18,0.82)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10,
+                }}>
+                  <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(79,200,120,0.15)', border: '2px solid rgba(79,200,120,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: '#4fc878' }}>✓</div>
+                  <p style={{ color: '#4fc878', fontWeight: 700, fontSize: '1.2rem' }}>Check-in confirmado!</p>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem' }}>Continuando em instantes...</p>
+                </div>
+              )}
+
+              {/* Overlay — inscrito encontrado */}
+              {scanResult && !checkinDone && (
+                <div style={{
+                  position: 'absolute', bottom: 0, left: 0, right: 0,
+                  background: 'linear-gradient(to top, rgba(8,6,18,0.97) 80%, transparent)',
+                  padding: '32px 24px 24px',
+                }}>
+                  <p style={{ fontSize: '0.68rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Inscrito encontrado</p>
+                  <p style={{ fontWeight: 700, fontSize: '1.25rem', marginBottom: 4, color: '#fff' }}>{scanResult.name}</p>
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
+                    <span style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>
+                      {TIER_LABELS[scanResult.priceTier] || scanResult.priceTier}
+                    </span>
+                    <span style={{ background: 'rgba(79,200,120,0.12)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#4fc878', fontWeight: 600 }}>
+                      R$ {(scanResult.amount / 100).toFixed(0)}
+                    </span>
+                    {scanResult.checkedIn && (
+                      <span style={{ background: 'rgba(251,191,36,0.12)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#fbbf24', fontWeight: 600 }}>
+                        Já fez check-in
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button onClick={() => resumeScanning()} style={{
+                      flex: 1, padding: '13px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.12)',
+                      background: 'rgba(255,255,255,0.06)', color: '#fff', cursor: 'pointer',
+                      fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem',
+                    }}>
+                      Cancelar
+                    </button>
+                    <button onClick={confirmCheckin} style={{
+                      flex: 2, padding: '13px', borderRadius: 12, border: 'none',
+                      background: scanResult.checkedIn
+                        ? 'rgba(251,191,36,0.25)'
+                        : 'linear-gradient(135deg,#7c3aed,#9333ea)',
+                      color: '#fff', cursor: 'pointer', fontWeight: 700,
+                      fontFamily: 'Outfit, sans-serif', fontSize: '0.95rem',
+                    }}>
+                      {scanResult.checkedIn ? 'Confirmar mesmo assim' : '✓ Confirmar Check-in'}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Result card */}
-            {checkinDone && (
-              <div style={{ background: 'rgba(79,200,120,0.1)', border: '1px solid rgba(79,200,120,0.3)', borderRadius: 14, padding: '20px', marginBottom: 20 }}>
-                <p style={{ fontSize: '2rem', marginBottom: 8 }}>✓</p>
-                <p style={{ color: '#4fc878', fontWeight: 700, fontSize: '1.1rem' }}>Check-in confirmado!</p>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', marginTop: 4 }}>Próximo scan em instantes...</p>
-              </div>
-            )}
-
-            {scanResult && !checkinDone && (
-              <div style={{ background: '#0f0a1a', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 14, padding: '20px', marginBottom: 20 }}>
-                <p style={{ fontSize: '0.72rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>Inscrito encontrado</p>
-                <p style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 4 }}>{scanResult.name}</p>
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', marginBottom: 4 }}>{scanResult.email}</p>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
-                  <span style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>
-                    {TIER_LABELS[scanResult.priceTier] || scanResult.priceTier}
-                  </span>
-                  <span style={{ background: 'rgba(79,200,120,0.1)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#4fc878', fontWeight: 600 }}>
-                    R$ {(scanResult.amount / 100).toFixed(0)}
-                  </span>
-                  {scanResult.checkedIn && (
-                    <span style={{ background: 'rgba(251,191,36,0.1)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#fbbf24', fontWeight: 600 }}>
-                      Já fez check-in
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <button onClick={() => { setScanResult(null); startScanner() }} style={{
-                    flex: 1, padding: '12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer',
-                    fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem',
-                  }}>
-                    Cancelar
-                  </button>
-                  <button onClick={confirmCheckin} style={{
-                    flex: 2, padding: '12px', borderRadius: 10, border: 'none',
-                    background: scanResult.checkedIn ? 'rgba(251,191,36,0.2)' : 'linear-gradient(135deg,#7c3aed,#9333ea)',
-                    color: '#fff', cursor: 'pointer', fontWeight: 700,
-                    fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem',
-                  }}>
-                    {scanResult.checkedIn ? 'Confirmar mesmo assim' : 'Confirmar Check-in'}
-                  </button>
-                </div>
-              </div>
-            )}
-
             {scanError && (
-              <p style={{ color: '#f87171', fontSize: '0.82rem', marginBottom: 16 }}>{scanError}</p>
+              <p style={{ color: '#f87171', fontSize: '0.82rem', marginBottom: 12 }}>{scanError}</p>
             )}
 
             <button
@@ -341,9 +360,7 @@ export default function AdminPage() {
               style={{
                 width: '100%', padding: '14px', borderRadius: 12,
                 border: scanning ? '1px solid rgba(248,113,113,0.3)' : 'none',
-                background: scanning
-                  ? 'rgba(248,113,113,0.15)'
-                  : 'linear-gradient(135deg,#7c3aed,#9333ea)',
+                background: scanning ? 'rgba(248,113,113,0.12)' : 'linear-gradient(135deg,#7c3aed,#9333ea)',
                 color: scanning ? '#f87171' : '#fff',
                 fontSize: '1rem', fontWeight: 700, cursor: 'pointer',
                 fontFamily: 'Outfit, sans-serif',
