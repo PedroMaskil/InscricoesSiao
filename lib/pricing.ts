@@ -11,12 +11,12 @@ export const EVENT = {
 // ─── Faixas de preço ──────────────────────────────────────
 export type PriceTier = 'outside' | 'local' | 'member_1st' | 'member_2nd' | 'member_final'
 
-export const PRICES: Record<PriceTier, { label: string; amount: number; priceId: string }> = {
-  outside:      { label: 'Fora de Maringá',        amount: 4000, priceId: process.env.STRIPE_PRICE_OUTSIDE!      },
-  local:        { label: 'Maringá',                amount: 6000, priceId: process.env.STRIPE_PRICE_LOCAL!        },
-  member_1st:   { label: 'Membro — 1º lote',       amount: 6000, priceId: process.env.STRIPE_PRICE_LOCAL!        },
-  member_2nd:   { label: 'Membro — 2º lote',       amount: 7000, priceId: process.env.STRIPE_PRICE_MEMBER_2ND!  },
-  member_final: { label: 'Membro — Lote final',    amount: 8000, priceId: process.env.STRIPE_PRICE_MEMBER_FINAL! },
+export const PRICES: Record<PriceTier, { label: string; amount: number }> = {
+  outside:      { label: 'Fora de Maringá',     amount: 4000 },
+  local:        { label: 'Maringá',             amount: 6000 },
+  member_1st:   { label: 'Membro — 1º lote',    amount: 6000 },
+  member_2nd:   { label: 'Membro — 2º lote',    amount: 7000 },
+  member_final: { label: 'Membro — Lote final', amount: 8000 },
 }
 
 // ─── Lógica de precificação ───────────────────────────────

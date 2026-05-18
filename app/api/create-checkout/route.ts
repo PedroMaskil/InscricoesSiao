@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { calcPriceTier, PRICES, isCepMaringa, EVENT } from '@/lib/pricing'
 
@@ -12,7 +11,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Campos obrigatórios faltando.' }, { status: 400 })
     }
 
-    // Verifica se inscrições estão abertas
     const now = new Date()
     if (now > EVENT.registrationDeadline) {
       return NextResponse.json({ error: 'As inscrições foram encerradas.' }, { status: 400 })
@@ -20,23 +18,16 @@ export async function POST(req: NextRequest) {
 
     const isMaringa = isCepMaringa(cep)
 
-    // Conta membros confirmados no 1º lote via Prisma
     let memberCount = 0
     if (isMember && isMaringa) {
       memberCount = await prisma.registration.count({
-        where: {
-          isMember: true,
-          status: 'confirmed',
-          priceTier: 'member_1st',
-        },
+        where: { isMember: true, status: 'confirmed', priceTier: 'member_1st' },
       })
     }
 
-    // Calcula o lote correto
     const tier      = calcPriceTier({ isMaringa, isMember, memberCount, now })
     const priceInfo = PRICES[tier]
 
-    // Salva inscrição como pending via Prisma
     const registration = await prisma.registration.create({
       data: {
         name, email, phone, cpf,
@@ -51,26 +42,37 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://inscricoes.batistasiao.org.br'
+    const handle = process.env.INFINITEPAY_HANDLE!
 
-    // Cria sessão no Stripe
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      customer_email: email,
-      line_items: [{ price: priceInfo.priceId, quantity: 1 }],
-      metadata: {
-        registration_id: registration.id,
-        name, phone, cpf,
-        price_tier: tier,
-        is_member: String(isMember),
-      },
-      success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${appUrl}/?canceled=true`,
-      locale: 'pt-BR',
+    const ipResponse = await fetch('https://api.checkout.infinitepay.io/links', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        handle,
+        redirect_url: `${appUrl}/sucesso?registration_id=${registration.id}`,
+        webhook_url:  `${appUrl}/api/webhook`,
+        order_nsu:    registration.id,
+        items: [{
+          quantity:    1,
+          price:       priceInfo.amount,
+          description: `LightHouse 2026 — ${priceInfo.label}`,
+        }],
+        customer: {
+          name:         name,
+          email:        email,
+          phone_number: `+55${phone.replace(/\D/g, '')}`,
+        },
+      }),
     })
 
-    return NextResponse.json({ url: session.url, tier, amount: priceInfo.amount, label: priceInfo.label })
+    if (!ipResponse.ok) {
+      const errText = await ipResponse.text()
+      throw new Error(`InfinitePay: ${errText}`)
+    }
+
+    const { url } = await ipResponse.json()
+    return NextResponse.json({ url, tier, amount: priceInfo.amount, label: priceInfo.label })
   } catch (err: any) {
     console.error('Checkout error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })

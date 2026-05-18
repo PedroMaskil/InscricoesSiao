@@ -1,29 +1,23 @@
-import Link from 'next/link'
-import { stripe } from '@/lib/stripe'
 import QRCode from 'qrcode'
 
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: { session_id?: string }
+  searchParams: { registration_id?: string }
 }) {
   let qrDataUrl: string | null = null
-  let registrationId: string | null = null
+  const registrationId = searchParams.registration_id ?? null
 
-  if (searchParams.session_id) {
+  if (registrationId) {
     try {
-      const session = await stripe.checkout.sessions.retrieve(searchParams.session_id)
-      registrationId = session.metadata?.registration_id ?? null
-      if (registrationId) {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://inscricoes.batistasiao.org.br'
-        qrDataUrl = await QRCode.toDataURL(`${baseUrl}/checkin/${registrationId}`, {
-          width: 220,
-          margin: 2,
-          color: { dark: '#1a0a2e', light: '#ffffff' },
-        })
-      }
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://inscricoes.batistasiao.org.br'
+      qrDataUrl = await QRCode.toDataURL(`${baseUrl}/checkin/${registrationId}`, {
+        width: 220,
+        margin: 2,
+        color: { dark: '#1a0a2e', light: '#ffffff' },
+      })
     } catch {
-      // session not found — show page without QR
+      // QR generation failed — show page without QR
     }
   }
 
