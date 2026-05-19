@@ -55,6 +55,8 @@ model Caravan {
   status       String    @default("confirmed")
   paidAt       DateTime? @map("paid_at")
   invoiceSlug  String?   @map("invoice_slug")
+  pixChargeId  String?   @map("pix_charge_id")
+  pixBrcode    String?   @map("pix_brcode")
   checkedIn    Boolean   @default(false) @map("checked_in")
   checkedInAt  DateTime? @map("checked_in_at")
   createdAt    DateTime  @default(now()) @map("created_at")
