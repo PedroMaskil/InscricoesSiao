@@ -34,12 +34,7 @@ export default function CaravanaPage() {
       const res  = await fetch('/api/caravana', { method: 'POST', body: fd })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
-      const params = new URLSearchParams({
-        id:     json.caravanId,
-        brcode: json.brcode,
-        amount: String(json.amount),
-      })
-      window.location.href = `/caravana/pagar?${params}`
+      window.location.href = json.url
     } catch (err: any) {
       setError(err.message)
       setLoading(false)

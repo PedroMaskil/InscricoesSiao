@@ -46,7 +46,6 @@ export async function POST(req: NextRequest) {
 
     const amount = peopleCount * 4000 // R$40 por pessoa em centavos
 
-    // Cria o registro no banco como pending
     const caravan = await prisma.caravan.create({
       data: {
         city, church, leader, leaderPhone, leaderEmail,
@@ -59,47 +58,36 @@ export async function POST(req: NextRequest) {
     })
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://inscricoes.batistasiao.org.br'
+    const handle = process.env.INFINITEPAY_HANDLE!
 
-    // Cria cobrança PIX via InfinitePay API direta
-    // Docs: https://developers.infinitepay.io
-    const ipResponse = await fetch('https://api.infinitepay.io/v2/pix/charges', {
+    const ipResponse = await fetch('https://api.checkout.infinitepay.io/links', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.INFINITEPAY_ACCESS_TOKEN}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        amount,
-        description: `LightHouse 2026 — Caravana ${church} (${peopleCount} ${peopleCount === 1 ? 'pessoa' : 'pessoas'})`,
-        expiration_in_minutes: 2880,
-        notification_url: `${appUrl}/api/pix-webhook`,
-        metadata: { caravan_id: caravan.id },
+        handle,
+        redirect_url: `${appUrl}/caravana/sucesso?caravan_id=${caravan.id}`,
+        webhook_url:  `${appUrl}/api/webhook`,
+        order_nsu:    `caravan_${caravan.id}`,
+        items: [{
+          quantity:    1,
+          price:       amount,
+          description: `LightHouse 2026 — Caravana ${church} (${peopleCount} ${peopleCount === 1 ? 'pessoa' : 'pessoas'})`,
+        }],
+        customer: {
+          name:         leader,
+          email:        leaderEmail,
+          phone_number: `+55${leaderPhone.replace(/\D/g, '')}`,
+        },
       }),
     })
 
     if (!ipResponse.ok) {
       const errText = await ipResponse.text()
-      // Remove caravan criada para não deixar registro órfão
-      await prisma.caravan.delete({ where: { id: caravan.id } }).catch(() => {})
-      throw new Error(`InfinitePay PIX: ${errText}`)
+      throw new Error(`InfinitePay: ${errText}`)
     }
 
-    const pixData = await ipResponse.json()
-    // pixData esperado: { id, brcode, status, expiration_at, ... }
-
-    await prisma.caravan.update({
-      where: { id: caravan.id },
-      data: {
-        pixChargeId: pixData.id ?? null,
-        pixBrcode:   pixData.brcode ?? pixData.br_code ?? pixData.qr_code ?? null,
-      },
-    })
-
-    return NextResponse.json({
-      caravanId: caravan.id,
-      brcode:    pixData.brcode ?? pixData.br_code ?? pixData.qr_code ?? null,
-      amount,
-    })
+    const { url } = await ipResponse.json()
+    return NextResponse.json({ url, caravanId: caravan.id, amount })
   } catch (err: any) {
     console.error('Caravan error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })

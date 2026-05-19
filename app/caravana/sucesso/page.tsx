@@ -1,14 +1,64 @@
 import QRCode from 'qrcode'
 import { prisma } from '@/lib/prisma'
+import { sendCaravanConfirmationEmail } from '@/lib/email'
 
 export default async function CaravanSuccessPage({
   searchParams,
 }: {
-  searchParams: { caravan_id?: string }
+  searchParams: {
+    caravan_id?: string
+    slug?: string
+    transaction_nsu?: string
+  }
 }) {
   const caravanId = searchParams.caravan_id ?? null
   let qrDataUrl: string | null = null
   let caravan: Awaited<ReturnType<typeof prisma.caravan.findUnique>> | null = null
+
+  if (caravanId && searchParams.slug && searchParams.transaction_nsu) {
+    try {
+      const checkRes = await fetch('https://api.checkout.infinitepay.io/payment_check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          handle:          process.env.INFINITEPAY_HANDLE!,
+          order_nsu:       `caravan_${caravanId}`,
+          transaction_nsu: searchParams.transaction_nsu,
+          slug:            searchParams.slug,
+        }),
+      })
+
+      if (checkRes.ok) {
+        const { paid } = await checkRes.json()
+        if (paid) {
+          const existing = await prisma.caravan.findUnique({ where: { id: caravanId } })
+          if (existing && existing.status === 'pending') {
+            await prisma.caravan.update({
+              where: { id: caravanId },
+              data: {
+                status:      'confirmed',
+                paidAt:      new Date(),
+                invoiceSlug: searchParams.slug,
+              },
+            })
+            if (existing.leaderEmail) {
+              await sendCaravanConfirmationEmail({
+                id:          existing.id,
+                leader:      existing.leader,
+                email:       existing.leaderEmail,
+                city:        existing.city,
+                church:      existing.church,
+                peopleCount: existing.peopleCount,
+                amount:      existing.amount,
+              }).catch(err => console.error('Caravan email error:', err))
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Payment check error:', err)
+    }
+  }
 
   if (caravanId) {
     caravan = await prisma.caravan.findUnique({ where: { id: caravanId } })
