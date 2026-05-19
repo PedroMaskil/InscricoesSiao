@@ -122,7 +122,7 @@ export default async function SuccessPage({
               <img src={qrDataUrl} width={180} height={180} alt="QR Code de check-in" style={{ display: 'block' }} />
             </div>
             <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: 12 }}>
-              Salve esta tela ou use o QR do email na entrada do evento
+              Salve esta tela ou use o QR do email na entrada do evento.
             </p>
           </div>
         )}
