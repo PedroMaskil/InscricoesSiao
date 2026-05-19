@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendConfirmationEmail } from '@/lib/email'
+import { sendConfirmationEmail, sendCaravanConfirmationEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,21 +11,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing order_nsu' }, { status: 400 })
     }
 
-    const registration = await prisma.registration.update({
-      where: { id: order_nsu },
-      data: {
-        status: 'confirmed',
-        stripeSessionId: invoice_slug ?? null,
-        paidAt: new Date(),
-      },
-    })
+    if (order_nsu.startsWith('caravan_')) {
+      const caravanId = order_nsu.replace('caravan_', '')
 
-    await sendConfirmationEmail({
-      id:     registration.id,
-      name:   registration.name,
-      email:  registration.email,
-      amount: registration.amount,
-    }).catch(err => console.error('Email error:', err))
+      const caravan = await prisma.caravan.update({
+        where: { id: caravanId },
+        data: {
+          status:      'confirmed',
+          invoiceSlug: invoice_slug ?? null,
+          paidAt:      new Date(),
+        },
+      })
+
+      if (caravan.leaderEmail) {
+        await sendCaravanConfirmationEmail({
+          id:          caravan.id,
+          leader:      caravan.leader,
+          email:       caravan.leaderEmail,
+          city:        caravan.city,
+          church:      caravan.church,
+          peopleCount: caravan.peopleCount,
+          amount:      caravan.amount,
+        }).catch(err => console.error('Caravan email error:', err))
+      }
+    } else {
+      const registration = await prisma.registration.update({
+        where: { id: order_nsu },
+        data: {
+          status:          'confirmed',
+          stripeSessionId: invoice_slug ?? null,
+          paidAt:          new Date(),
+        },
+      })
+
+      await sendConfirmationEmail({
+        id:     registration.id,
+        name:   registration.name,
+        email:  registration.email,
+        amount: registration.amount,
+      }).catch(err => console.error('Email error:', err))
+    }
 
     return NextResponse.json({ received: true })
   } catch (err: any) {

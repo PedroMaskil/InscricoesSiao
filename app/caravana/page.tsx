@@ -12,18 +12,17 @@ function formatPhone(v: string) {
 
 export default function CaravanaPage() {
   const [form, setForm] = useState({
-    city: '', church: '', leader: '', leaderPhone: '', peopleCount: '',
+    city: '', church: '', leader: '', leaderPhone: '', leaderEmail: '', peopleCount: '',
   })
   const [file, setFile]       = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [error, setError]     = useState('')
 
   const update = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.city || !form.church || !form.leader || !form.leaderPhone || !form.peopleCount) {
+    if (!form.city || !form.church || !form.leader || !form.leaderPhone || !form.leaderEmail || !form.peopleCount) {
       setError('Preencha todos os campos obrigatórios.'); return
     }
     setLoading(true); setError('')
@@ -35,34 +34,12 @@ export default function CaravanaPage() {
       const res  = await fetch('/api/caravana', { method: 'POST', body: fd })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
-      setSuccess(true)
+      window.location.href = json.url
     } catch (err: any) {
       setError(err.message)
-    } finally {
       setLoading(false)
     }
   }
-
-  if (success) return (
-    <main style={{ minHeight: '100vh', background: '#080612', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'Outfit, sans-serif' }}>
-      <div style={{ maxWidth: 440, width: '100%', textAlign: 'center', background: '#0f0a1a', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 20, padding: '52px 36px' }}>
-        <div style={{ fontSize: '3rem', marginBottom: 20 }}>✓</div>
-        <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, color: '#fff', marginBottom: 12 }}>
-          Caravana registrada!
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, fontSize: '0.9rem' }}>
-          Os dados da sua caravana foram recebidos com sucesso.<br />
-          Entraremos em contato para alinhar os dados inseridos e a forma de pagamento!<br /><br />
-          Qualquer dúvida estaremos à disposição{' '}
-          <a href="https://wa.me/5544999605447" target="_blank" rel="noreferrer"
-            style={{ color: '#c084fc', fontWeight: 600, textDecoration: 'none' }}>
-            (44) 99960-5447
-          </a>
-          {' '}— Pedro
-        </p>
-      </div>
-    </main>
-  )
 
   return (
     <main style={{ minHeight: '100vh', background: '#080612', fontFamily: 'Outfit, sans-serif' }}>
@@ -257,6 +234,15 @@ export default function CaravanaPage() {
               </div>
 
               <div>
+                <label className="field-label">E-mail do líder *</label>
+                <input type="email" placeholder="lider@igreja.com.br"
+                  value={form.leaderEmail} onChange={e => update('leaderEmail', e.target.value)} />
+                <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginTop: 6 }}>
+                  Enviaremos a confirmação e o QR code para este e-mail
+                </p>
+              </div>
+
+              <div>
                 <label className="field-label">Lista de participantes (PDF)</label>
                 <div
                   onClick={() => document.getElementById('file-input')?.click()}
@@ -310,7 +296,7 @@ export default function CaravanaPage() {
                 boxShadow: loading ? 'none' : '0 4px 24px rgba(124,58,237,0.3)',
                 transition: 'all 0.25s ease', marginTop: 8,
               }}>
-                {loading ? 'Enviando...' : 'Registrar caravana →'}
+                {loading ? 'Aguarde...' : 'Ir para pagamento →'}
               </button>
 
             </div>

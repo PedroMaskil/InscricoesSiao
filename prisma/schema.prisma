@@ -47,10 +47,14 @@ model Caravan {
   church       String
   leader       String
   leaderPhone  String    @map("leader_phone")
+  leaderEmail  String?   @map("leader_email")
   peopleCount  Int       @map("people_count")
+  amount       Int       @default(0)
   listFileUrl  String?   @map("list_file_url")
   listFileName String?   @map("list_file_name")
   status       String    @default("confirmed")
+  paidAt       DateTime? @map("paid_at")
+  invoiceSlug  String?   @map("invoice_slug")
   checkedIn    Boolean   @default(false) @map("checked_in")
   checkedInAt  DateTime? @map("checked_in_at")
   createdAt    DateTime  @default(now()) @map("created_at")

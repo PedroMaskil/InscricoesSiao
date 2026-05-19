@@ -10,17 +10,17 @@ export async function POST(req: NextRequest) {
     const church      = formData.get('church') as string
     const leader      = formData.get('leader') as string
     const leaderPhone = formData.get('leaderPhone') as string
+    const leaderEmail = formData.get('leaderEmail') as string
     const peopleCount = parseInt(formData.get('peopleCount') as string)
     const file        = formData.get('file') as File | null
 
-    if (!city || !church || !leader || !leaderPhone || !peopleCount) {
+    if (!city || !church || !leader || !leaderPhone || !leaderEmail || !peopleCount) {
       return NextResponse.json({ error: 'Campos obrigatórios faltando.' }, { status: 400 })
     }
 
     let listFileUrl  = null
     let listFileName = null
 
-    // Upload do PDF para o Supabase Storage
     if (file && file.size > 0) {
       const db = supabaseAdmin()
       const bytes    = await file.arrayBuffer()
@@ -44,18 +44,51 @@ export async function POST(req: NextRequest) {
       listFileName = file.name
     }
 
-    // Salva caravana no banco
+    const amount = peopleCount * 4000 // R$40 por pessoa em centavos
+
     const caravan = await prisma.caravan.create({
       data: {
-        city, church, leader, leaderPhone,
+        city, church, leader, leaderPhone, leaderEmail,
         peopleCount,
+        amount,
         listFileUrl,
         listFileName,
-        status: 'confirmed',
+        status: 'pending',
       },
     })
 
-    return NextResponse.json({ success: true, id: caravan.id })
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://inscricoes.batistasiao.org.br'
+    const handle = process.env.INFINITEPAY_HANDLE!
+
+    const ipResponse = await fetch('https://api.checkout.infinitepay.io/links', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        handle,
+        redirect_url: `${appUrl}/caravana/sucesso?caravan_id=${caravan.id}`,
+        webhook_url:  `${appUrl}/api/webhook`,
+        order_nsu:    `caravan_${caravan.id}`,
+        payment_methods: ['pix'],
+        items: [{
+          quantity:    1,
+          price:       amount,
+          description: `LightHouse 2026 — Caravana ${church} (${peopleCount} ${peopleCount === 1 ? 'pessoa' : 'pessoas'})`,
+        }],
+        customer: {
+          name:         leader,
+          email:        leaderEmail,
+          phone_number: `+55${leaderPhone.replace(/\D/g, '')}`,
+        },
+      }),
+    })
+
+    if (!ipResponse.ok) {
+      const errText = await ipResponse.text()
+      throw new Error(`InfinitePay: ${errText}`)
+    }
+
+    const { url } = await ipResponse.json()
+    return NextResponse.json({ url, caravanId: caravan.id, amount })
   } catch (err: any) {
     console.error('Caravan error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })
