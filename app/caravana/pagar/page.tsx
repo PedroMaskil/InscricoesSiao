@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import QRCode from 'qrcode'
 
-export default function PagarPage() {
+function PagarContent() {
   const searchParams  = useSearchParams()
   const caravanId     = searchParams.get('id')
   const brcodeParam   = searchParams.get('brcode')
@@ -212,5 +212,17 @@ export default function PagarPage() {
         `}</style>
       </div>
     </main>
+  )
+}
+
+export default function PagarPage() {
+  return (
+    <Suspense fallback={
+      <main style={{ minHeight: '100vh', background: '#080612', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Outfit, sans-serif' }}>Carregando...</p>
+      </main>
+    }>
+      <PagarContent />
+    </Suspense>
   )
 }
