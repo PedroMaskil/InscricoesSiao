@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       if (days.length === 0) {
         return NextResponse.json({ error: 'Selecione pelo menos um dia de participação.' }, { status: 400 })
       }
-      tier      = 'maringa_days'
+      tier      = `maringa_days:${days.join(',')}`
       priceInfo = {
         label:  `Maringá — ${days.map(d => DAY_LABELS[d]).join(' + ')}`,
         amount: calcDayAmount(days),

@@ -23,6 +23,21 @@ const TIER_LABELS: Record<string, string> = {
   member_1st: 'Membro 1º lote', member_2nd: 'Membro 2º lote', member_final: 'Membro final',
 }
 
+const DAY_LABEL: Record<string, string> = { quinta: 'Quinta', sexta: 'Sexta', sabado: 'Sábado' }
+
+function parseDays(priceTier: string): string[] {
+  if (!priceTier.startsWith('maringa_days:')) return []
+  return priceTier.replace('maringa_days:', '').split(',').filter(Boolean)
+}
+
+function getTierLabel(priceTier: string): string {
+  if (priceTier.startsWith('maringa_days')) {
+    const days = parseDays(priceTier)
+    return days.length > 0 ? `Maringá — ${days.map(d => DAY_LABEL[d] ?? d).join(' + ')}` : 'Maringá'
+  }
+  return TIER_LABELS[priceTier] ?? priceTier
+}
+
 export default function AdminPage() {
   const [tab, setTab]             = useState<'caravans' | 'individuals'>('caravans')
   const [scannerOpen, setScannerOpen] = useState(false)
@@ -345,15 +360,20 @@ export default function AdminPage() {
                   )}
                 </div>
 
-                <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap', alignItems: 'center' }}>
                   {i.isMember && (
                     <span style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#c084fc', fontWeight: 600 }}>
                       Membro
                     </span>
                   )}
                   <span style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>
-                    {TIER_LABELS[i.priceTier] || i.priceTier}
+                    {getTierLabel(i.priceTier)}
                   </span>
+                  {parseDays(i.priceTier).map(d => (
+                    <span key={d} style={{ background: 'rgba(192,132,252,0.1)', border: '1px solid rgba(192,132,252,0.25)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#c084fc', fontWeight: 600 }}>
+                      {DAY_LABEL[d] ?? d}
+                    </span>
+                  ))}
                   <span style={{ background: 'rgba(79,200,120,0.1)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#4fc878', fontWeight: 600 }}>
                     R$ {(i.amount / 100).toFixed(0)}
                   </span>
@@ -412,9 +432,9 @@ export default function AdminPage() {
               <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(8,6,18,0.98) 75%, transparent)', padding: '40px 24px 32px' }}>
                 <p style={{ fontSize: '0.68rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Inscrito encontrado</p>
                 <p style={{ fontWeight: 700, fontSize: '1.4rem', marginBottom: 8, color: '#fff' }}>{scanResult.name}</p>
-                <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
                   <span style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 100, padding: '4px 12px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>
-                    {TIER_LABELS[scanResult.priceTier] || scanResult.priceTier}
+                    {getTierLabel(scanResult.priceTier)}
                   </span>
                   <span style={{ background: 'rgba(79,200,120,0.12)', borderRadius: 100, padding: '4px 12px', fontSize: '0.75rem', color: '#4fc878', fontWeight: 600 }}>
                     R$ {(scanResult.amount / 100).toFixed(0)}
@@ -425,6 +445,22 @@ export default function AdminPage() {
                     </span>
                   )}
                 </div>
+
+                {parseDays(scanResult.priceTier).length > 0 && (
+                  <div style={{ marginBottom: 16 }}>
+                    <p style={{ fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>Dias comprados</p>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {parseDays(scanResult.priceTier).map(d => (
+                        <span key={d} style={{
+                          background: 'rgba(192,132,252,0.15)', border: '1px solid rgba(192,132,252,0.4)',
+                          borderRadius: 8, padding: '6px 14px', fontSize: '0.85rem', color: '#e9d5ff', fontWeight: 700,
+                        }}>
+                          {DAY_LABEL[d] ?? d}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button onClick={cancelScan} style={{ flex: 1, padding: '14px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', color: '#fff', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem' }}>
                     Cancelar
