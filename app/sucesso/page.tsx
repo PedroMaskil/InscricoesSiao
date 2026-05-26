@@ -1,6 +1,7 @@
 import QRCode from 'qrcode'
 import { prisma } from '@/lib/prisma'
 import { sendConfirmationEmail } from '@/lib/email'
+import QrDownloadButton from './QrDownloadButton'
 
 export default async function SuccessPage({
   searchParams,
@@ -13,7 +14,9 @@ export default async function SuccessPage({
   }
 }) {
   const registrationId = searchParams.registration_id ?? searchParams.order_nsu ?? null
-  let qrDataUrl: string | null = null
+  let qrDataUrl:  string | null = null
+  let regName:    string        = ''
+  let regTier:    string        = ''
 
   // Verifica pagamento com InfinitePay e confirma inscrição
   if (registrationId && searchParams.slug && searchParams.transaction_nsu) {
@@ -33,6 +36,10 @@ export default async function SuccessPage({
         const { paid } = await checkRes.json()
         if (paid) {
           const reg = await prisma.registration.findUnique({ where: { id: registrationId } })
+          if (reg) {
+            regName = reg.name
+            regTier = reg.priceTier
+          }
           if (reg && reg.status === 'pending') {
             await prisma.registration.update({
               where: { id: registrationId },
@@ -43,10 +50,11 @@ export default async function SuccessPage({
               },
             })
             await sendConfirmationEmail({
-              id:     reg.id,
-              name:   reg.name,
-              email:  reg.email,
-              amount: reg.amount,
+              id:        reg.id,
+              name:      reg.name,
+              email:     reg.email,
+              amount:    reg.amount,
+              priceTier: reg.priceTier,
             }).catch(err => console.error('Email error:', err))
           }
         }
@@ -54,6 +62,17 @@ export default async function SuccessPage({
     } catch (err) {
       console.error('Payment check error:', err)
     }
+  }
+
+  // Busca nome/tier se ainda não preenchido (acesso direto à página)
+  if (registrationId && !regName) {
+    try {
+      const r = await prisma.registration.findUnique({
+        where: { id: registrationId },
+        select: { name: true, priceTier: true },
+      })
+      if (r) { regName = r.name; regTier = r.priceTier }
+    } catch { /* silently ignore */ }
   }
 
   // Gera QR code de check-in
@@ -115,14 +134,21 @@ export default async function SuccessPage({
             border: '1px solid rgba(124,58,237,0.2)',
             borderRadius: 16, padding: '24px 20px', marginBottom: 28,
           }}>
-            <p style={{ fontSize: '0.78rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>
+            <p style={{ fontSize: '0.78rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
               Seu QR Code de check-in
             </p>
-            <div style={{ display: 'inline-block', background: '#fff', borderRadius: 12, padding: 10 }}>
+            {regName && (
+              <p style={{ fontWeight: 700, fontSize: '1rem', color: '#fff', marginBottom: 4 }}>{regName}</p>
+            )}
+            <div style={{ display: 'inline-block', background: '#fff', borderRadius: 12, padding: 10, marginBottom: 12, marginTop: 8 }}>
               <img src={qrDataUrl} width={180} height={180} alt="QR Code de check-in" style={{ display: 'block' }} />
             </div>
-            <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: 12 }}>
-              Salve esta tela ou use o QR do email na entrada do evento.
+            <p style={{ fontSize: '0.75rem', color: '#c084fc', fontWeight: 600, marginBottom: 16 }}>
+              Check-in: Fila 02
+            </p>
+            <QrDownloadButton qrDataUrl={qrDataUrl} name={regName} priceTier={regTier} />
+            <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
+              O e-mail com o QR Code também foi enviado para você.
             </p>
           </div>
         )}

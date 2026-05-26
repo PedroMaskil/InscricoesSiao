@@ -46,6 +46,49 @@ export default function AdminPage() {
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState('')
   const [pdfModal, setPdfModal]   = useState<string | null>(null)
+  const [emailStatus, setEmailStatus] = useState<Record<string, 'sending' | 'sent' | 'error'>>({})
+  const [bulk, setBulk] = useState<{ status: 'idle' | 'sending' | 'done'; sent: number; errors: number; total: number }>
+    ({ status: 'idle', sent: 0, errors: 0, total: 0 })
+
+  const resendEmail = async (id: string) => {
+    setEmailStatus(prev => ({ ...prev, [id]: 'sending' }))
+    try {
+      const res = await fetch('/api/resend-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setEmailStatus(prev => ({ ...prev, [id]: 'sent' }))
+    } catch {
+      setEmailStatus(prev => ({ ...prev, [id]: 'error' }))
+    } finally {
+      setTimeout(() => setEmailStatus(prev => { const n = { ...prev }; delete n[id]; return n }), 3000)
+    }
+  }
+
+  const sendAllEmails = async () => {
+    if (bulk.status === 'sending') return
+    const list = individuals
+    setBulk({ status: 'sending', sent: 0, errors: 0, total: list.length })
+    let sent = 0, errors = 0
+    for (const i of list) {
+      try {
+        const res = await fetch('/api/resend-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: i.id }),
+        })
+        if (res.ok) sent++ ; else errors++
+      } catch {
+        errors++
+      }
+      setBulk(prev => ({ ...prev, sent, errors }))
+    }
+    setBulk({ status: 'done', sent, errors, total: list.length })
+    setTimeout(() => setBulk({ status: 'idle', sent: 0, errors: 0, total: 0 }), 6000)
+  }
 
   // Scanner state
   const [scanning, setScanning]       = useState(false)
@@ -210,12 +253,34 @@ export default function AdminPage() {
           <p style={{ fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c084fc', marginBottom: 4 }}>Painel de Check-in</p>
           <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.8rem', fontWeight: 700 }}>LightHouse 2026</h1>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button onClick={exportPDF} style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 10, padding: '8px 18px', color: '#c084fc', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
             ↓ Exportar PDF
           </button>
           <button onClick={fetchData} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 18px', color: '#fff', cursor: 'pointer', fontSize: '0.82rem' }}>
             ↻ Atualizar
+          </button>
+          <button
+            onClick={sendAllEmails}
+            disabled={bulk.status === 'sending' || individuals.length === 0}
+            style={{
+              borderRadius: 10, padding: '8px 18px', fontSize: '0.82rem', fontWeight: 600,
+              cursor: (bulk.status === 'sending' || individuals.length === 0) ? 'not-allowed' : 'pointer',
+              border: `1px solid ${bulk.status === 'done' ? (bulk.errors > 0 ? 'rgba(248,113,113,0.4)' : 'rgba(79,200,120,0.4)') : 'rgba(192,132,252,0.3)'}`,
+              background: bulk.status === 'done'
+                ? (bulk.errors > 0 ? 'rgba(248,113,113,0.1)' : 'rgba(79,200,120,0.1)')
+                : 'rgba(192,132,252,0.1)',
+              color: bulk.status === 'done'
+                ? (bulk.errors > 0 ? '#f87171' : '#4fc878')
+                : '#c084fc',
+              transition: 'all 0.25s',
+              minWidth: 160,
+            }}
+          >
+            {bulk.status === 'idle' && `✉ Enviar para todos`}
+            {bulk.status === 'sending' && `Enviando ${bulk.sent + bulk.errors}/${bulk.total}…`}
+            {bulk.status === 'done' && bulk.errors === 0 && `✓ ${bulk.sent} enviados`}
+            {bulk.status === 'done' && bulk.errors > 0  && `✓ ${bulk.sent} · ✗ ${bulk.errors} erros`}
           </button>
         </div>
       </div>
@@ -328,55 +393,102 @@ export default function AdminPage() {
         ) : (
 
           /* ── INDIVIDUAIS ── */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {filteredIndividuals.length === 0 && <p style={{ color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '40px 0' }}>Nenhum inscrito encontrado.</p>}
             {filteredIndividuals.map(i => (
               <div key={i.id} style={{
                 background: i.checkedIn ? 'rgba(79,200,120,0.06)' : '#111',
                 border: `1px solid ${i.checkedIn ? 'rgba(79,200,120,0.25)' : 'rgba(255,255,255,0.07)'}`,
-                borderRadius: 14, padding: '16px 20px',
-                display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+                borderRadius: 14, padding: '14px 16px',
+                display: 'flex', alignItems: 'flex-start', gap: 12,
                 transition: 'all 0.2s',
               }}>
+                {/* Botão check-in */}
                 <button onClick={() => toggleCheckin(i.id, 'individual')} style={{
-                  width: 36, height: 36, borderRadius: '50%', border: 'none', flexShrink: 0,
+                  width: 38, height: 38, borderRadius: '50%', border: 'none', flexShrink: 0, marginTop: 2,
                   background: i.checkedIn ? '#4fc878' : 'rgba(255,255,255,0.08)',
                   color: i.checkedIn ? '#fff' : 'rgba(255,255,255,0.4)',
-                  fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s',
+                  fontSize: '1.1rem', cursor: 'pointer', transition: 'all 0.2s',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {i.checkedIn ? '✓' : '○'}
                 </button>
 
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  <p style={{ fontWeight: 600, fontSize: '0.92rem', marginBottom: 2 }}>{i.name}</p>
-                  <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' }}>
+                {/* Conteúdo */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+
+                  {/* Linha 1: nome + preço + botão e-mail */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                    <p style={{ fontWeight: 700, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                      {i.name}
+                    </p>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
+                      <span style={{ background: 'rgba(79,200,120,0.12)', borderRadius: 100, padding: '2px 10px', fontSize: '0.78rem', color: '#4fc878', fontWeight: 700 }}>
+                        R$ {(i.amount / 100).toFixed(0)}
+                      </span>
+                      <button
+                        onClick={() => resendEmail(i.id)}
+                        disabled={!!emailStatus[i.id]}
+                        title="Reenviar e-mail com QR Code"
+                        style={{
+                          width: 30, height: 30, borderRadius: 8, border: 'none',
+                          cursor: emailStatus[i.id] ? 'default' : 'pointer',
+                          fontSize: '0.8rem', flexShrink: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'all 0.2s',
+                          background: emailStatus[i.id] === 'sent'
+                            ? 'rgba(79,200,120,0.15)'
+                            : emailStatus[i.id] === 'error'
+                              ? 'rgba(248,113,113,0.15)'
+                              : emailStatus[i.id] === 'sending'
+                                ? 'rgba(255,255,255,0.04)'
+                                : 'rgba(192,132,252,0.1)',
+                          color: emailStatus[i.id] === 'sent'
+                            ? '#4fc878'
+                            : emailStatus[i.id] === 'error'
+                              ? '#f87171'
+                              : '#c084fc',
+                        }}
+                      >
+                        {emailStatus[i.id] === 'sending' ? '…'
+                          : emailStatus[i.id] === 'sent'  ? '✓'
+                          : emailStatus[i.id] === 'error' ? '✗'
+                          : '✉'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Linha 2: email · telefone */}
+                  <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.38)', marginBottom: 7, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {i.email} · {i.phone}
                   </p>
-                  {i.checkedIn && i.checkedInAt && (
-                    <p style={{ fontSize: '0.72rem', color: '#4fc878', marginTop: 3 }}>
-                      ✓ Check-in às {new Date(i.checkedInAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  )}
-                </div>
 
-                <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap', alignItems: 'center' }}>
-                  {i.isMember && (
-                    <span style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#c084fc', fontWeight: 600 }}>
-                      Membro
-                    </span>
-                  )}
-                  <span style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>
-                    {getTierLabel(i.priceTier)}
-                  </span>
-                  {parseDays(i.priceTier).map(d => (
-                    <span key={d} style={{ background: 'rgba(192,132,252,0.1)', border: '1px solid rgba(192,132,252,0.25)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#c084fc', fontWeight: 600 }}>
-                      {DAY_LABEL[d] ?? d}
-                    </span>
-                  ))}
-                  <span style={{ background: 'rgba(79,200,120,0.1)', borderRadius: 100, padding: '3px 10px', fontSize: '0.72rem', color: '#4fc878', fontWeight: 600 }}>
-                    R$ {(i.amount / 100).toFixed(0)}
-                  </span>
+                  {/* Linha 3: dias ou tier + check-in time */}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                    {parseDays(i.priceTier).length > 0
+                      ? parseDays(i.priceTier).map(d => (
+                          <span key={d} style={{ background: 'rgba(192,132,252,0.13)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: 6, padding: '3px 10px', fontSize: '0.73rem', color: '#e9d5ff', fontWeight: 700 }}>
+                            {DAY_LABEL[d] ?? d}
+                          </span>
+                        ))
+                      : (
+                          <span style={{ fontSize: '0.73rem', color: 'rgba(255,255,255,0.38)' }}>
+                            {getTierLabel(i.priceTier)}
+                          </span>
+                        )
+                    }
+                    {i.isMember && (
+                      <span style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 6, padding: '3px 10px', fontSize: '0.73rem', color: '#c084fc', fontWeight: 600 }}>
+                        Membro
+                      </span>
+                    )}
+                    {i.checkedIn && i.checkedInAt && (
+                      <span style={{ fontSize: '0.72rem', color: '#4fc878', fontWeight: 600 }}>
+                        ✓ {new Date(i.checkedInAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                  </div>
+
                 </div>
               </div>
             ))}

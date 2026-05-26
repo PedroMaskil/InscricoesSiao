@@ -112,13 +112,25 @@ export async function sendCaravanConfirmationEmail(params: {
 }
 
 
+const DAY_FULL_EMAIL: Record<string, string> = {
+  quinta: 'Quinta-feira, 25/06 — 20h às 22h',
+  sexta:  'Sexta-feira, 26/06 — 20h às 22h',
+  sabado: 'Sábado, 27/06 — 16h às 21h',
+}
+
+function parseDaysEmail(priceTier: string): string[] {
+  if (!priceTier.startsWith('maringa_days:')) return []
+  return priceTier.replace('maringa_days:', '').split(',').filter(Boolean)
+}
+
 export async function sendConfirmationEmail(params: {
   id: string
   name: string
   email: string
   amount: number
+  priceTier?: string
 }) {
-  const { id, name, email, amount } = params
+  const { id, name, email, amount, priceTier = '' } = params
   const firstName = name.split(' ')[0]
   const valor = (amount / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://inscricoes.batistasiao.org.br'
@@ -157,11 +169,18 @@ export async function sendConfirmationEmail(params: {
 
         <!-- QR Code -->
         <tr><td style="padding:24px 40px 8px;text-align:center;">
-          <p style="margin:0 0 12px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Seu QR Code de check-in</p>
+          <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Seu ingresso</p>
+          <p style="margin:0 0 4px;font-size:16px;font-weight:700;color:#fff;">${firstName}</p>
+          ${(() => {
+            const days = parseDaysEmail(priceTier)
+            if (days.length === 0) return ''
+            return `<p style="margin:0 0 14px;font-size:12px;color:#e9d5ff;font-weight:600;">${days.map(d => DAY_FULL_EMAIL[d] ?? d).join('<br>')}</p>`
+          })()}
           <div style="display:inline-block;background:#fff;border-radius:12px;padding:10px;">
             <img src="${qrImageUrl}" width="180" height="180" alt="QR Code" style="display:block;" />
           </div>
-          <p style="margin:10px 0 0;font-size:12px;color:rgba(255,255,255,0.35);">Apresente este QR code na entrada do evento</p>
+          <p style="margin:10px 0 4px;font-size:13px;font-weight:700;color:#c084fc;">Check-in: Fila 02</p>
+          <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.35);">Apresente este QR code na entrada do evento</p>
         </td></tr>
 
         <!-- Detalhes do evento -->
