@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { isCepMaringa, formatCep, calcPriceTier, PRICES, EVENT } from '@/lib/pricing'
+import { isCepMaringa, formatCep, calcPriceTier, PRICES } from '@/lib/pricing'
 import { CalendarDays, Clock, MapPin, ClipboardList, Phone } from 'lucide-react'
 
 type FormData = {
@@ -33,15 +33,28 @@ function formatMoney(cents: number) {
   return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+const DAYS = [
+  { id: 'quinta', label: 'Quinta-feira', date: '25/06', time: '20h–22h', amount: 5000 },
+  { id: 'sexta',  label: 'Sexta-feira',  date: '26/06', time: '20h–22h', amount: 4000 },
+  { id: 'sabado', label: 'Sábado',       date: '27/06', time: '16h–21h', amount: 4000 },
+]
+
+function calcDayTotal(days: string[]): number {
+  if (days.length === 3) return 7000
+  return days.reduce((sum, id) => sum + (DAYS.find(d => d.id === id)?.amount ?? 0), 0)
+}
+
 export default function RegistrationPage() {
   const [isOtherMember, setIsOtherMember] = useState(false)
-  const [otherChurch, setOtherChurch]   = useState('')
-  const [cepCity, setCepCity]           = useState('')
-  const [cepValid, setCepValid]     = useState<boolean | null>(null)
-  const [cepLoading, setCepLoading] = useState(false)
-  const [loading, setLoading]       = useState(false)
-  const [error, setError]           = useState('')
-  const [showForm, setShowForm]     = useState(false)
+  const [otherChurch, setOtherChurch]     = useState('')
+  const [isNotSiao, setIsNotSiao]         = useState(true)
+  const [selectedDays, setSelectedDays]   = useState<string[]>([])
+  const [cepCity, setCepCity]             = useState('')
+  const [cepValid, setCepValid]           = useState<boolean | null>(null)
+  const [cepLoading, setCepLoading]       = useState(false)
+  const [loading, setLoading]             = useState(false)
+  const [error, setError]                 = useState('')
+  const [showForm, setShowForm]           = useState(false)
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>()
   const watchedCep = watch('cep', '')
@@ -69,6 +82,13 @@ export default function RegistrationPage() {
     : null
   const previewPrice = previewTier ? PRICES[previewTier] : null
 
+  const dayTotal  = calcDayTotal(selectedDays)
+  const canSubmit = cepValid === true && (!isMaringa || selectedDays.length > 0)
+
+  const toggleDay = (id: string) => {
+    setSelectedDays(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id])
+  }
+
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     setError('')
@@ -76,7 +96,15 @@ export default function RegistrationPage() {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, isMember: false, city: cepCity, isOtherMember, otherChurch: isOtherMember ? otherChurch : null }),
+        body: JSON.stringify({
+          ...data,
+          isMember: false,
+          city: cepCity,
+          isOtherMember,
+          otherChurch: isOtherMember ? otherChurch : null,
+          isNotSiao,
+          selectedDays: isMaringa ? selectedDays : [],
+        }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Erro desconhecido')
@@ -94,7 +122,6 @@ export default function RegistrationPage() {
       {/* ── HERO ── */}
       <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
 
-        {/* Fundo: mesma imagem com blur */}
         <img
           src="/banner.jpeg"
           aria-hidden="true"
@@ -107,10 +134,8 @@ export default function RegistrationPage() {
             opacity: 0.55,
           }}
         />
-        {/* Escurece o fundo borrado */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,6,18,0.6)' }} />
 
-        {/* Imagem principal centralizada */}
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 0' }}>
           <img
             src="/banner.jpeg"
@@ -122,8 +147,6 @@ export default function RegistrationPage() {
               boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
             }}
           />
-
-          {/* Gradiente que funde a imagem com o fundo da página */}
           <div style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
             background: 'linear-gradient(to bottom, transparent, #080612)',
@@ -131,7 +154,6 @@ export default function RegistrationPage() {
           }} />
         </div>
 
-        {/* Logo / Igreja */}
         <div style={{ position: 'absolute', top: 28, left: 28, zIndex: 2 }}>
           <p style={{ fontSize: '0.78rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
             Igreja Batista Sião · Maringá
@@ -142,7 +164,6 @@ export default function RegistrationPage() {
       {/* ── DETALHES DO EVENTO ── */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 0' }}>
 
-        {/* Info texto */}
         <div style={{ marginBottom: 48 }}>
           <h2 style={{ fontFamily: "'Nunito', sans-serif", fontSize: '2.2rem', fontWeight: 900, color: '#fff', marginBottom: 24, letterSpacing: '-0.01em' }}>
             Conferência LightHouse 2026
@@ -174,8 +195,6 @@ export default function RegistrationPage() {
           </div>
         </div>
 
-
-        {/* Contato */}
         <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 10 }}>
           <Phone size={15} color="#c084fc" style={{ flexShrink: 0 }} />
           <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.45)', margin: 0 }}>
@@ -188,7 +207,6 @@ export default function RegistrationPage() {
           </p>
         </div>
 
-        {/* CTA botão */}
         <div style={{ textAlign: 'center', paddingBottom: 64 }}>
           <button
             onClick={() => { setShowForm(true); setTimeout(() => document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' }), 100) }}
@@ -217,7 +235,6 @@ export default function RegistrationPage() {
               Preencha os dados abaixo para garantir sua vaga
             </p>
 
-
             {/* Toggle membro de outra igreja */}
             <div
               onClick={() => { setIsOtherMember(!isOtherMember); setOtherChurch('') }}
@@ -235,7 +252,7 @@ export default function RegistrationPage() {
             </div>
 
             {isOtherMember && (
-              <div style={{ marginBottom: 28 }}>
+              <div style={{ marginBottom: 12 }}>
                 <label className="field-label">Qual?</label>
                 <input
                   type="text"
@@ -246,6 +263,22 @@ export default function RegistrationPage() {
                 />
               </div>
             )}
+
+            {/* Toggle não faz parte da Sião */}
+            <div
+              onClick={() => setIsNotSiao(!isNotSiao)}
+              style={{
+                background: isNotSiao ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isNotSiao ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                borderRadius: 14, padding: '16px 18px', marginBottom: 28,
+                cursor: 'pointer', transition: 'all 0.25s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                <input type="checkbox" className="custom-check" checked={isNotSiao} onChange={e => setIsNotSiao(e.target.checked)} style={{ marginTop: 2 }} />
+                <p style={{ fontWeight: 600, fontSize: '0.92rem', color: '#fff' }}>Não faço parte da Sião</p>
+              </div>
+            </div>
 
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -289,10 +322,14 @@ export default function RegistrationPage() {
                   <div style={{ position: 'relative' }}>
                     <input type="text" placeholder="00000-000"
                       {...register('cep', { required: 'CEP é obrigatório', minLength: { value: 9, message: 'CEP inválido' } })}
-                      onChange={e => { setValue('cep', formatCep(e.target.value)); setCepValid(null) }}
+                      onChange={e => { setValue('cep', formatCep(e.target.value)); setCepValid(null); setSelectedDays([]) }}
                       onBlur={e => handleCepBlur(e.target.value)}
                     />
-                    {cepLoading && <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)' }}>buscando...</span>}
+                    {cepLoading && (
+                      <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)' }}>
+                        buscando...
+                      </span>
+                    )}
                   </div>
                   {cepValid === true && (
                     <p style={{ fontSize: '0.78rem', color: '#c084fc', marginTop: 5 }}>
@@ -302,6 +339,100 @@ export default function RegistrationPage() {
                   {cepValid === false && <p className="error-msg">CEP não encontrado</p>}
                   {errors.cep && <p className="error-msg">{errors.cep.message}</p>}
                 </div>
+
+                {/* Seleção de dias — apenas para Maringá */}
+                {isMaringa && cepValid === true && (
+                  <div>
+                    <label className="field-label">Dias de participação</label>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                      {DAYS.map(day => {
+                        const selected = selectedDays.includes(day.id)
+                        return (
+                          <div
+                            key={day.id}
+                            onClick={() => toggleDay(day.id)}
+                            style={{
+                              flex: 1,
+                              background: selected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.03)',
+                              border: `1px solid ${selected ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                              borderRadius: 12,
+                              padding: '14px 10px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              textAlign: 'center' as const,
+                              position: 'relative' as const,
+                            }}
+                          >
+                            {selected && (
+                              <div style={{
+                                position: 'absolute', top: 6, right: 8,
+                                width: 16, height: 16, borderRadius: '50%',
+                                background: '#7c3aed',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '0.6rem', color: '#fff',
+                              }}>✓</div>
+                            )}
+                            <p style={{ fontWeight: 700, fontSize: '0.82rem', color: '#fff', marginBottom: 4 }}>{day.label}</p>
+                            <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>{day.date} · {day.time}</p>
+                            <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.2rem', fontWeight: 700, color: selected ? '#c084fc' : 'rgba(255,255,255,0.7)' }}>
+                              {formatMoney(day.amount)}
+                            </p>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {selectedDays.length > 0 ? (
+                      <>
+                        <div style={{
+                          marginTop: 12,
+                          background: 'rgba(124,58,237,0.07)',
+                          border: '1px solid rgba(124,58,237,0.2)',
+                          borderRadius: 12,
+                          padding: '14px 18px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        }}>
+                          <div>
+                            {selectedDays.length === 3 && (
+                              <p style={{ fontSize: '0.72rem', color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>
+                                Pacote completo
+                              </p>
+                            )}
+                            <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.7rem', fontWeight: 700, color: '#fff', lineHeight: 1 }}>
+                              {formatMoney(dayTotal)}
+                            </p>
+                          </div>
+                          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', maxWidth: 130, textAlign: 'right', lineHeight: 1.4 }}>
+                            Valor final confirmado no próximo passo
+                          </span>
+                        </div>
+
+                        {selectedDays.length === 2 && (
+                          <div style={{
+                            marginTop: 8,
+                            background: 'rgba(234,179,8,0.07)',
+                            border: '1px solid rgba(234,179,8,0.25)',
+                            borderRadius: 10,
+                            padding: '10px 14px',
+                            display: 'flex', alignItems: 'center', gap: 8,
+                          }}>
+                            <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>💡</span>
+                            <p style={{ fontSize: '0.78rem', color: 'rgba(253,224,71,0.85)', lineHeight: 1.5, margin: 0 }}>
+                              Adicionando o terceiro dia você paga apenas{' '}
+                              <strong style={{ color: '#fde047' }}>R$ 70,00</strong>
+                              {' '}— economize{' '}
+                              <strong style={{ color: '#fde047' }}>{formatMoney(dayTotal - 7000)}</strong>!
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: 8, textAlign: 'center' }}>
+                        Selecione pelo menos um dia para continuar
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 <div>
                   <label className="field-label">Como ficou sabendo?</label>
@@ -314,8 +445,8 @@ export default function RegistrationPage() {
                   </select>
                 </div>
 
-                {/* Preview preço */}
-                {previewPrice && cepValid === true && (
+                {/* Preview preço — apenas para fora de Maringá */}
+                {!isMaringa && previewPrice && cepValid === true && (
                   <div style={{
                     background: 'rgba(124,58,237,0.07)',
                     border: '1px solid rgba(124,58,237,0.2)',
@@ -344,14 +475,14 @@ export default function RegistrationPage() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !canSubmit}
                   style={{
                     width: '100%', padding: '16px 24px', borderRadius: 100, border: 'none',
-                    background: loading ? 'rgba(124,58,237,0.3)' : 'linear-gradient(135deg, #7c3aed, #9333ea)',
+                    background: (loading || !canSubmit) ? 'rgba(124,58,237,0.3)' : 'linear-gradient(135deg, #7c3aed, #9333ea)',
                     color: '#fff', fontFamily: 'Outfit, sans-serif',
                     fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.04em',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    boxShadow: loading ? 'none' : '0 4px 24px rgba(124,58,237,0.3)',
+                    cursor: (loading || !canSubmit) ? 'not-allowed' : 'pointer',
+                    boxShadow: (loading || !canSubmit) ? 'none' : '0 4px 24px rgba(124,58,237,0.3)',
                     transition: 'all 0.25s ease', marginTop: 8,
                   }}
                 >

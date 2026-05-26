@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { calcPriceTier, PRICES, isCepMaringa, EVENT } from '@/lib/pricing'
 
+const DAY_AMOUNTS: Record<string, number> = { quinta: 5000, sexta: 4000, sabado: 4000 }
+const DAY_LABELS:  Record<string, string>  = { quinta: 'Qui', sexta: 'Sex', sabado: 'Sáb' }
+
+function calcDayAmount(days: string[]): number {
+  if (days.length === 3) return 7000
+  return days.reduce((sum, d) => sum + (DAY_AMOUNTS[d] ?? 0), 0)
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, email, phone, cpf, source, cep, city, isMember, isOtherMember, otherChurch } = body
+    const { name, email, phone, cpf, source, cep, city, isMember, isOtherMember, otherChurch, selectedDays } = body
 
     if (!name || !email || !phone || !cpf || !cep) {
       return NextResponse.json({ error: 'Campos obrigatórios faltando.' }, { status: 400 })
@@ -18,15 +26,24 @@ export async function POST(req: NextRequest) {
 
     const isMaringa = isCepMaringa(cep)
 
-    let memberCount = 0
-    if (isMember && isMaringa) {
-      memberCount = await prisma.registration.count({
-        where: { isMember: true, status: 'confirmed', priceTier: 'member_1st' },
-      })
-    }
+    let tier: string
+    let priceInfo: { label: string; amount: number }
 
-    const tier      = calcPriceTier({ isMaringa, isMember, memberCount, now })
-    const priceInfo = PRICES[tier]
+    if (isMaringa) {
+      const days: string[] = Array.isArray(selectedDays) ? selectedDays.filter((d: string) => DAY_AMOUNTS[d]) : []
+      if (days.length === 0) {
+        return NextResponse.json({ error: 'Selecione pelo menos um dia de participação.' }, { status: 400 })
+      }
+      tier      = 'maringa_days'
+      priceInfo = {
+        label:  `Maringá — ${days.map(d => DAY_LABELS[d]).join(' + ')}`,
+        amount: calcDayAmount(days),
+      }
+    } else {
+      const resolvedTier = calcPriceTier({ isMaringa, isMember: isMember || false, memberCount: 0, now })
+      tier      = resolvedTier
+      priceInfo = PRICES[resolvedTier]
+    }
 
     const registration = await prisma.registration.create({
       data: {
