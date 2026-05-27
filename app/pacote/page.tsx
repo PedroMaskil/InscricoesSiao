@@ -1,0 +1,519 @@
+'use client'
+
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { isCepMaringa, formatCep, calcPriceTier, PRICES } from '@/lib/pricing'
+import { CalendarDays, Clock, MapPin, ClipboardList, Phone } from 'lucide-react'
+
+type FormData = {
+  name: string
+  email: string
+  phone: string
+  cpf: string
+  cep: string
+  source: string
+}
+
+function formatCPF(v: string) {
+  return v.replace(/\D/g, '')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+    .slice(0, 14)
+}
+
+function formatPhone(v: string) {
+  return v.replace(/\D/g, '')
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d)/, '$1-$2')
+    .slice(0, 15)
+}
+
+function formatMoney(cents: number) {
+  return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+const DAYS = [
+  { id: 'quinta', label: 'Quinta-feira', date: '25/06', time: '20h–22h', amount: 5000 },
+  { id: 'sexta',  label: 'Sexta-feira',  date: '26/06', time: '20h–22h', amount: 4000 },
+  { id: 'sabado', label: 'Sábado',       date: '27/06', time: '16h–21h', amount: 4000 },
+]
+
+function calcDayTotal(days: string[]): number {
+  if (days.length === 3) return 8000
+  return days.reduce((sum, id) => sum + (DAYS.find(d => d.id === id)?.amount ?? 0), 0)
+}
+
+export default function RegistrationPagePacote() {
+  const [isOtherMember, setIsOtherMember] = useState(false)
+  const [otherChurch, setOtherChurch]     = useState('')
+  const [isNotSiao, setIsNotSiao]         = useState(true)
+  const [selectedDays, setSelectedDays]   = useState<string[]>([])
+  const [cepCity, setCepCity]             = useState('')
+  const [cepValid, setCepValid]           = useState<boolean | null>(null)
+  const [cepLoading, setCepLoading]       = useState(false)
+  const [loading, setLoading]             = useState(false)
+  const [error, setError]                 = useState('')
+  const [showForm, setShowForm]           = useState(false)
+
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>()
+  const watchedCep = watch('cep', '')
+
+  const handleCepBlur = async (cep: string) => {
+    const digits = cep.replace(/\D/g, '')
+    if (digits.length !== 8) { setCepValid(false); return }
+    setCepLoading(true)
+    try {
+      const res  = await fetch(`https://viacep.com.br/ws/${digits}/json/`)
+      const data = await res.json()
+      if (data.erro) { setCepValid(false); setCepCity(''); return }
+      setCepCity(data.localidade)
+      setCepValid(true)
+    } catch {
+      setCepValid(false)
+    } finally {
+      setCepLoading(false)
+    }
+  }
+
+  const isMaringa    = isCepMaringa(watchedCep)
+  const previewTier  = watchedCep.replace(/\D/g, '').length === 8
+    ? calcPriceTier({ isMaringa, isMember: false, memberCount: 0 })
+    : null
+  const previewPrice = previewTier ? PRICES[previewTier] : null
+
+  const dayTotal  = calcDayTotal(selectedDays)
+  const canSubmit = cepValid === true && (!isMaringa || selectedDays.length > 0)
+
+  const toggleDay = (id: string) => {
+    setSelectedDays(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id])
+  }
+
+  const onSubmit = async (data: FormData) => {
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          isMember: false,
+          city: cepCity,
+          isOtherMember,
+          otherChurch: isOtherMember ? otherChurch : null,
+          isNotSiao,
+          selectedDays: isMaringa ? selectedDays : [],
+          fullPackage: isMaringa && selectedDays.length === 3,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Erro desconhecido')
+      window.location.href = json.url
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <main style={{ minHeight: '100vh', background: '#080612', fontFamily: 'Outfit, sans-serif' }}>
+
+      {/* ── HERO ── */}
+      <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
+
+        <img
+          src="/banner.jpeg"
+          aria-hidden="true"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'cover',
+            filter: 'blur(4px)',
+            transform: 'scale(1.12)',
+            opacity: 0.55,
+          }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,6,18,0.6)' }} />
+
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 0' }}>
+          <img
+            src="/banner.jpeg"
+            alt="LightHouse 2026"
+            style={{
+              width: '100%', maxWidth: 860,
+              height: 'auto', display: 'block',
+              borderRadius: 16,
+              boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            }}
+          />
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
+            background: 'linear-gradient(to bottom, transparent, #080612)',
+            borderRadius: '0 0 16px 16px',
+          }} />
+        </div>
+
+        <div style={{ position: 'absolute', top: 28, left: 28, zIndex: 2 }}>
+          <p style={{ fontSize: '0.78rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
+            Igreja Batista Sião · Maringá
+          </p>
+        </div>
+      </div>
+
+      {/* ── DETALHES DO EVENTO ── */}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 0' }}>
+
+        <div style={{ marginBottom: 48 }}>
+          <h2 style={{ fontFamily: "'Nunito', sans-serif", fontSize: '2.2rem', fontWeight: 900, color: '#fff', marginBottom: 24, letterSpacing: '-0.01em' }}>
+            Conferência LightHouse 2026
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { icon: <CalendarDays size={17} />, label: 'Data', value: '25, 26 e 27 de Junho' },
+              { icon: <Clock size={17} />,        label: 'Horários', value: 'Qui/Sex 20h–22h · Sáb 16h–21h' },
+              { icon: <MapPin size={17} />,       label: 'Local', value: 'Igreja Batista Sião, Maringá', address: 'R. Manoel de Macedo, 37 - Zona 7', maps: 'https://maps.google.com/?q=R.+Manoel+de+Macedo,+37,+Zona+7,+Maringá,+PR' },
+              { icon: <ClipboardList size={17} />,label: 'Período de Inscrição', value: 'Até 25 de Junho' },
+            ].map((item: any) => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: '0.95rem' }}>
+                <span style={{ color: '#c084fc', flexShrink: 0, display: 'flex', marginTop: 2 }}>{item.icon}</span>
+                <div>
+                  <span style={{ color: 'rgba(255,255,255,0.5)', marginRight: 4 }}>{item.label}:</span>
+                  <span style={{ color: '#fff', fontWeight: 500 }}>{item.value}</span>
+                  {item.address && (
+                    <div style={{ marginTop: 3 }}>
+                      <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)' }}>{item.address} · </span>
+                      <a href={item.maps} target="_blank" rel="noreferrer"
+                        style={{ fontSize: '0.8rem', color: '#c084fc', textDecoration: 'none', fontWeight: 500 }}>
+                        Ver no Maps ↗
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Phone size={15} color="#c084fc" style={{ flexShrink: 0 }} />
+          <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+            Dúvidas e suporte:{' '}
+            <a href="https://wa.me/5544999605447" target="_blank" rel="noreferrer"
+              style={{ color: '#fff', fontWeight: 600, textDecoration: 'none' }}>
+              (44) 99960-5447
+            </a>
+            <span style={{ color: 'rgba(255,255,255,0.3)' }}> — Pedro</span>
+          </p>
+        </div>
+
+        <div style={{ textAlign: 'center', paddingBottom: 64 }}>
+          <button
+            onClick={() => { setShowForm(true); setTimeout(() => document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' }), 100) }}
+            style={{
+              background: 'linear-gradient(135deg, #7c3aed, #9333ea)',
+              color: '#fff', border: 'none', borderRadius: 100,
+              padding: '16px 48px', fontSize: '1rem', fontWeight: 700,
+              cursor: 'pointer', letterSpacing: '0.04em',
+              boxShadow: '0 8px 32px rgba(124,58,237,0.3)',
+              width: '100%', maxWidth: 360,
+            }}
+          >
+            Inscrever-se agora
+          </button>
+        </div>
+      </div>
+
+      {/* ── FORMULÁRIO ── */}
+      {showForm && (
+        <div id="form-section" style={{ background: '#0a0815', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px 80px' }}>
+          <div style={{ maxWidth: 520, margin: '0 auto' }}>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, marginBottom: 8, color: '#fff', textAlign: 'center' }}>
+              Inscrição
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.88rem', textAlign: 'center', marginBottom: 36 }}>
+              Preencha os dados abaixo para garantir sua vaga
+            </p>
+
+            {/* Toggle membro de outra igreja */}
+            <div
+              onClick={() => { setIsOtherMember(!isOtherMember); setOtherChurch('') }}
+              style={{
+                background: isOtherMember ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isOtherMember ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                borderRadius: 14, padding: '16px 18px', marginBottom: 12,
+                cursor: 'pointer', transition: 'all 0.25s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                <input type="checkbox" className="custom-check" checked={isOtherMember} onChange={e => setIsOtherMember(e.target.checked)} style={{ marginTop: 2 }} />
+                <p style={{ fontWeight: 600, fontSize: '0.92rem', color: '#fff' }}>Sou membro de outra igreja</p>
+              </div>
+            </div>
+
+            {isOtherMember && (
+              <div style={{ marginBottom: 12 }}>
+                <label className="field-label">Qual?</label>
+                <input
+                  type="text"
+                  placeholder="Nome da sua igreja"
+                  value={otherChurch}
+                  onChange={e => setOtherChurch(e.target.value)}
+                  onClick={e => e.stopPropagation()}
+                />
+              </div>
+            )}
+
+            {/* Toggle não faz parte da Sião */}
+            <div
+              onClick={() => setIsNotSiao(!isNotSiao)}
+              style={{
+                background: isNotSiao ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isNotSiao ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                borderRadius: 14, padding: '16px 18px', marginBottom: 28,
+                cursor: 'pointer', transition: 'all 0.25s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                <input type="checkbox" className="custom-check" checked={isNotSiao} onChange={e => setIsNotSiao(e.target.checked)} style={{ marginTop: 2 }} />
+                <p style={{ fontWeight: 600, fontSize: '0.92rem', color: '#fff' }}>Não faço parte da Sião</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+                <div>
+                  <label className="field-label">Nome completo</label>
+                  <input type="text" placeholder="Seu nome completo"
+                    {...register('name', { required: 'Nome é obrigatório' })} />
+                  {errors.name && <p className="error-msg">{errors.name.message}</p>}
+                </div>
+
+                <div>
+                  <label className="field-label">E-mail</label>
+                  <input type="email" placeholder="seu@email.com"
+                    {...register('email', {
+                      required: 'E-mail é obrigatório',
+                      pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'E-mail inválido' },
+                    })} />
+                  {errors.email && <p className="error-msg">{errors.email.message}</p>}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div>
+                    <label className="field-label">WhatsApp</label>
+                    <input type="tel" placeholder="(44) 99999-9999"
+                      {...register('phone', { required: 'Telefone é obrigatório' })}
+                      onChange={e => setValue('phone', formatPhone(e.target.value))} />
+                    {errors.phone && <p className="error-msg">{errors.phone.message}</p>}
+                  </div>
+                  <div>
+                    <label className="field-label">CPF</label>
+                    <input type="text" placeholder="000.000.000-00"
+                      {...register('cpf', { required: 'CPF é obrigatório', minLength: { value: 14, message: 'CPF inválido' } })}
+                      onChange={e => setValue('cpf', formatCPF(e.target.value))} />
+                    {errors.cpf && <p className="error-msg">{errors.cpf.message}</p>}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="field-label">CEP</label>
+                  <div style={{ position: 'relative' }}>
+                    <input type="text" placeholder="00000-000"
+                      {...register('cep', { required: 'CEP é obrigatório', minLength: { value: 9, message: 'CEP inválido' } })}
+                      onChange={e => { setValue('cep', formatCep(e.target.value)); setCepValid(null); setSelectedDays([]) }}
+                      onBlur={e => handleCepBlur(e.target.value)}
+                    />
+                    {cepLoading && (
+                      <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)' }}>
+                        buscando...
+                      </span>
+                    )}
+                  </div>
+                  {cepValid === true && (
+                    <p style={{ fontSize: '0.78rem', color: '#c084fc', marginTop: 5 }}>
+                      📍 {cepCity} {isMaringa ? '— Maringá ✓' : '— fora de Maringá'}
+                    </p>
+                  )}
+                  {cepValid === false && <p className="error-msg">CEP não encontrado</p>}
+                  {errors.cep && <p className="error-msg">{errors.cep.message}</p>}
+                </div>
+
+                {/* Seleção de dias — apenas para Maringá */}
+                {isMaringa && cepValid === true && (
+                  <div>
+                    <label className="field-label">Dias de participação</label>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                      {DAYS.map(day => {
+                        const selected = selectedDays.includes(day.id)
+                        return (
+                          <div
+                            key={day.id}
+                            onClick={() => toggleDay(day.id)}
+                            style={{
+                              flex: 1,
+                              background: selected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.03)',
+                              border: `1px solid ${selected ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                              borderRadius: 12,
+                              padding: '14px 10px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              textAlign: 'center' as const,
+                              position: 'relative' as const,
+                            }}
+                          >
+                            {selected && (
+                              <div style={{
+                                position: 'absolute', top: 6, right: 8,
+                                width: 16, height: 16, borderRadius: '50%',
+                                background: '#7c3aed',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '0.6rem', color: '#fff',
+                              }}>✓</div>
+                            )}
+                            <p style={{ fontWeight: 700, fontSize: '0.82rem', color: '#fff', marginBottom: 4 }}>{day.label}</p>
+                            <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>{day.date} · {day.time}</p>
+                            <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.2rem', fontWeight: 700, color: selected ? '#c084fc' : 'rgba(255,255,255,0.7)' }}>
+                              {formatMoney(day.amount)}
+                            </p>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {selectedDays.length > 0 ? (
+                      <>
+                        <div style={{
+                          marginTop: 12,
+                          background: 'rgba(124,58,237,0.07)',
+                          border: '1px solid rgba(124,58,237,0.2)',
+                          borderRadius: 12,
+                          padding: '14px 18px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        }}>
+                          <div>
+                            {selectedDays.length === 3 && (
+                              <p style={{ fontSize: '0.72rem', color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>
+                                Pacote completo
+                              </p>
+                            )}
+                            <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.7rem', fontWeight: 700, color: '#fff', lineHeight: 1 }}>
+                              {formatMoney(dayTotal)}
+                            </p>
+                          </div>
+                          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', maxWidth: 130, textAlign: 'right', lineHeight: 1.4 }}>
+                            Valor final confirmado no próximo passo
+                          </span>
+                        </div>
+
+                        {selectedDays.length === 2 && dayTotal > 8000 && (
+                          <div style={{
+                            marginTop: 8,
+                            background: 'rgba(234,179,8,0.07)',
+                            border: '1px solid rgba(234,179,8,0.25)',
+                            borderRadius: 10,
+                            padding: '10px 14px',
+                            display: 'flex', alignItems: 'center', gap: 8,
+                          }}>
+                            <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>💡</span>
+                            <p style={{ fontSize: '0.78rem', color: 'rgba(253,224,71,0.85)', lineHeight: 1.5, margin: 0 }}>
+                              Adicionando o terceiro dia você paga apenas{' '}
+                              <strong style={{ color: '#fde047' }}>R$ 80,00</strong>
+                              {' '}— economize{' '}
+                              <strong style={{ color: '#fde047' }}>{formatMoney(dayTotal - 8000)}</strong>!
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: 8, textAlign: 'center' }}>
+                        Selecione pelo menos um dia para continuar
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <label className="field-label">Como ficou sabendo?</label>
+                  <select {...register('source')}>
+                    <option value="">Selecione uma opção</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="indicacao">Indicação de amigo</option>
+                    <option value="whatsapp">Grupo de WhatsApp</option>
+                    <option value="outro">Outro</option>
+                  </select>
+                </div>
+
+                {/* Preview preço — apenas para fora de Maringá */}
+                {!isMaringa && previewPrice && cepValid === true && (
+                  <div style={{
+                    background: 'rgba(124,58,237,0.07)',
+                    border: '1px solid rgba(124,58,237,0.2)',
+                    borderRadius: 12, padding: '14px 18px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  }}>
+                    <div>
+                      <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>
+                        {previewPrice.label}
+                      </p>
+                      <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.7rem', fontWeight: 700, color: '#fff', lineHeight: 1 }}>
+                        {formatMoney(previewPrice.amount)}
+                      </p>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', maxWidth: 130, textAlign: 'right', lineHeight: 1.4 }}>
+                      Valor final confirmado no próximo passo
+                    </span>
+                  </div>
+                )}
+
+                {error && (
+                  <div style={{ background: 'rgba(229,115,115,0.1)', border: '1px solid rgba(229,115,115,0.3)', borderRadius: 10, padding: '12px 16px', fontSize: '0.85rem', color: '#e57373' }}>
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading || !canSubmit}
+                  style={{
+                    width: '100%', padding: '16px 24px', borderRadius: 100, border: 'none',
+                    background: (loading || !canSubmit) ? 'rgba(124,58,237,0.3)' : 'linear-gradient(135deg, #7c3aed, #9333ea)',
+                    color: '#fff', fontFamily: 'Outfit, sans-serif',
+                    fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.04em',
+                    cursor: (loading || !canSubmit) ? 'not-allowed' : 'pointer',
+                    boxShadow: (loading || !canSubmit) ? 'none' : '0 4px 24px rgba(124,58,237,0.3)',
+                    transition: 'all 0.25s ease', marginTop: 8,
+                  }}
+                >
+                  {loading ? 'Redirecionando...' : 'Continuar para pagamento →'}
+                </button>
+
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 20, flexWrap: 'wrap', marginTop: 4 }}>
+                  {['🔒 Pagamento seguro', '⏰ Inscrições até 25/06', '💳 Pix · Cartão'].map(t => (
+                    <span key={t} style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>{t}</span>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 12 }}>
+                  <Phone size={13} color="rgba(192,132,252,0.6)" />
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', margin: 0 }}>
+                    Suporte:{' '}
+                    <a href="https://wa.me/5544999605447" target="_blank" rel="noreferrer"
+                      style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, textDecoration: 'none' }}>
+                      (44) 99960-5447
+                    </a>
+                    {' '}— Pedro
+                  </p>
+                </div>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+    </main>
+  )
+}

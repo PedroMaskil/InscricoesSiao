@@ -5,15 +5,15 @@ import { calcPriceTier, PRICES, isCepMaringa, EVENT } from '@/lib/pricing'
 const DAY_AMOUNTS: Record<string, number> = { quinta: 5000, sexta: 4000, sabado: 4000 }
 const DAY_LABELS:  Record<string, string>  = { quinta: 'Qui', sexta: 'Sex', sabado: 'Sáb' }
 
-function calcDayAmount(days: string[]): number {
-  if (days.length === 3) return 7000
+function calcDayAmount(days: string[], fullPackage?: boolean): number {
+  if (days.length === 3) return fullPackage ? 8000 : 7000
   return days.reduce((sum, d) => sum + (DAY_AMOUNTS[d] ?? 0), 0)
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, email, phone, cpf, source, cep, city, isMember, isOtherMember, otherChurch, selectedDays } = body
+    const { name, email, phone, cpf, source, cep, city, isMember, isOtherMember, otherChurch, selectedDays, fullPackage } = body
 
     if (!name || !email || !phone || !cpf || !cep) {
       return NextResponse.json({ error: 'Campos obrigatórios faltando.' }, { status: 400 })
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       tier      = `maringa_days:${days.join(',')}`
       priceInfo = {
         label:  `Maringá — ${days.map(d => DAY_LABELS[d]).join(' + ')}`,
-        amount: calcDayAmount(days),
+        amount: calcDayAmount(days, fullPackage === true),
       }
     } else {
       const resolvedTier = calcPriceTier({ isMaringa, isMember: isMember || false, memberCount: 0, now })
