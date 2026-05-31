@@ -34,13 +34,26 @@ function formatMoney(cents: number) {
 }
 
 const DAYS = [
-  { id: 'quinta', label: 'Quinta-feira', date: '25/06', time: '20h–22h', amount: 5000 },
-  { id: 'sexta',  label: 'Sexta-feira',  date: '26/06', time: '20h–22h', amount: 4000 },
-  { id: 'sabado', label: 'Sábado',       date: '27/06', time: '16h–21h', amount: 4000 },
+  {
+    id:       'quinta_sexta',
+    label:    'Quinta + Sexta-feira',
+    sublabel: 'Duas noites',
+    date:     '25 e 26 de Junho',
+    time:     '20h às 22h',
+    amount:   5500,
+  },
+  {
+    id:       'sabado',
+    label:    'Sábado',
+    sublabel: 'Tarde e noite inteiros',
+    date:     '27 de Junho',
+    time:     '16h às 21h',
+    amount:   4000,
+  },
 ]
 
 function calcDayTotal(days: string[]): number {
-  if (days.length === 3) return 8000
+  if (days.length === 2) return 8000
   return days.reduce((sum, id) => sum + (DAYS.find(d => d.id === id)?.amount ?? 0), 0)
 }
 
@@ -104,7 +117,7 @@ export default function RegistrationPagePacote() {
           otherChurch: isOtherMember ? otherChurch : null,
           isNotSiao,
           selectedDays: isMaringa ? selectedDays : [],
-          fullPackage: isMaringa && selectedDays.length === 3,
+          fullPackage: isMaringa && selectedDays.length === 2,
         }),
       })
       const json = await res.json()
@@ -341,11 +354,19 @@ export default function RegistrationPagePacote() {
                   {errors.cep && <p className="error-msg">{errors.cep.message}</p>}
                 </div>
 
-                {/* Seleção de dias — apenas para Maringá */}
+                {/* Seleção de ingressos — apenas para Maringá */}
                 {isMaringa && cepValid === true && (
                   <div>
-                    <label className="field-label">Dias de participação</label>
-                    <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                    <div style={{ marginBottom: 14 }}>
+                      <label className="field-label" style={{ fontSize: '1rem', letterSpacing: '0.03em' }}>
+                        Escolha seus ingressos
+                      </label>
+                      <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', marginTop: 5, lineHeight: 1.5 }}>
+                        Selecione os dias que você vai participar. Pode escolher um ou os dois — clique para marcar!
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {DAYS.map(day => {
                         const selected = selectedDays.includes(day.id)
                         return (
@@ -353,29 +374,42 @@ export default function RegistrationPagePacote() {
                             key={day.id}
                             onClick={() => toggleDay(day.id)}
                             style={{
-                              flex: 1,
-                              background: selected ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.03)',
-                              border: `1px solid ${selected ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.08)'}`,
-                              borderRadius: 12,
-                              padding: '14px 10px',
+                              background: selected ? 'rgba(124,58,237,0.13)' : 'rgba(255,255,255,0.03)',
+                              border: `1.5px solid ${selected ? 'rgba(124,58,237,0.55)' : 'rgba(255,255,255,0.09)'}`,
+                              borderRadius: 14,
+                              padding: '16px 18px',
                               cursor: 'pointer',
                               transition: 'all 0.2s ease',
-                              textAlign: 'center' as const,
-                              position: 'relative' as const,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 12,
+                              userSelect: 'none' as const,
                             }}
                           >
-                            {selected && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                               <div style={{
-                                position: 'absolute', top: 6, right: 8,
-                                width: 16, height: 16, borderRadius: '50%',
-                                background: '#7c3aed',
+                                width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
+                                border: `2px solid ${selected ? '#7c3aed' : 'rgba(255,255,255,0.2)'}`,
+                                background: selected ? '#7c3aed' : 'transparent',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: '0.6rem', color: '#fff',
-                              }}>✓</div>
-                            )}
-                            <p style={{ fontWeight: 700, fontSize: '0.82rem', color: '#fff', marginBottom: 4 }}>{day.label}</p>
-                            <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>{day.date} · {day.time}</p>
-                            <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.2rem', fontWeight: 700, color: selected ? '#c084fc' : 'rgba(255,255,255,0.7)' }}>
+                                transition: 'all 0.2s ease',
+                              }}>
+                                {selected && <span style={{ fontSize: '0.65rem', color: '#fff', lineHeight: 1 }}>✓</span>}
+                              </div>
+                              <div>
+                                <p style={{ fontWeight: 700, fontSize: '0.97rem', color: '#fff', marginBottom: 3 }}>{day.label}</p>
+                                <p style={{ fontSize: '0.78rem', color: selected ? 'rgba(192,132,252,0.8)' : 'rgba(255,255,255,0.4)', marginBottom: 2 }}>{day.sublabel}</p>
+                                <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.28)' }}>{day.date} · {day.time}</p>
+                              </div>
+                            </div>
+                            <p style={{
+                              fontFamily: 'Cormorant Garamond, serif',
+                              fontSize: '1.45rem', fontWeight: 700,
+                              color: selected ? '#c084fc' : 'rgba(255,255,255,0.55)',
+                              flexShrink: 0,
+                              transition: 'color 0.2s ease',
+                            }}>
                               {formatMoney(day.amount)}
                             </p>
                           </div>
@@ -383,54 +417,65 @@ export default function RegistrationPagePacote() {
                       })}
                     </div>
 
-                    {selectedDays.length > 0 ? (
-                      <>
-                        <div style={{
-                          marginTop: 12,
-                          background: 'rgba(124,58,237,0.07)',
-                          border: '1px solid rgba(124,58,237,0.2)',
-                          borderRadius: 12,
-                          padding: '14px 18px',
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        }}>
-                          <div>
-                            {selectedDays.length === 3 && (
-                              <p style={{ fontSize: '0.72rem', color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>
-                                Pacote completo
-                              </p>
-                            )}
-                            <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.7rem', fontWeight: 700, color: '#fff', lineHeight: 1 }}>
-                              {formatMoney(dayTotal)}
-                            </p>
-                          </div>
-                          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', maxWidth: 130, textAlign: 'right', lineHeight: 1.4 }}>
-                            Valor final confirmado no próximo passo
-                          </span>
-                        </div>
-
-                        {selectedDays.length === 2 && dayTotal > 8000 && (
-                          <div style={{
-                            marginTop: 8,
-                            background: 'rgba(234,179,8,0.07)',
-                            border: '1px solid rgba(234,179,8,0.25)',
-                            borderRadius: 10,
-                            padding: '10px 14px',
-                            display: 'flex', alignItems: 'center', gap: 8,
-                          }}>
-                            <span style={{ fontSize: '0.9rem', flexShrink: 0 }}>💡</span>
-                            <p style={{ fontSize: '0.78rem', color: 'rgba(253,224,71,0.85)', lineHeight: 1.5, margin: 0 }}>
-                              Adicionando o terceiro dia você paga apenas{' '}
-                              <strong style={{ color: '#fde047' }}>R$ 80,00</strong>
-                              {' '}— economize{' '}
-                              <strong style={{ color: '#fde047' }}>{formatMoney(dayTotal - 8000)}</strong>!
-                            </p>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: 8, textAlign: 'center' }}>
-                        Selecione pelo menos um dia para continuar
+                    {selectedDays.length === 0 && (
+                      <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', marginTop: 10, textAlign: 'center' }}>
+                        Selecione pelo menos um ingresso para continuar
                       </p>
+                    )}
+
+                    {selectedDays.length === 1 && (
+                      <div style={{
+                        marginTop: 12,
+                        background: 'rgba(124,58,237,0.07)',
+                        border: '1px solid rgba(124,58,237,0.2)',
+                        borderRadius: 12,
+                        padding: '14px 18px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      }}>
+                        <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.7rem', fontWeight: 700, color: '#fff', lineHeight: 1 }}>
+                          {formatMoney(dayTotal)}
+                        </p>
+                        <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', maxWidth: 130, textAlign: 'right', lineHeight: 1.4 }}>
+                          Valor final confirmado no próximo passo
+                        </span>
+                      </div>
+                    )}
+
+                    {selectedDays.length === 2 && (
+                      <div style={{
+                        marginTop: 12,
+                        background: 'rgba(124,58,237,0.1)',
+                        border: '1px solid rgba(124,58,237,0.35)',
+                        borderRadius: 12,
+                        padding: '14px 18px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      }}>
+                        <div>
+                          <p style={{ fontSize: '0.72rem', color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
+                            Pacote completo — todos os dias
+                          </p>
+                          <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.7rem', fontWeight: 700, color: '#fff', lineHeight: 1 }}>
+                            {formatMoney(dayTotal)}
+                          </p>
+                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
+                            Qui, Sex e Sáb — 25, 26 e 27/06
+                          </p>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            background: 'rgba(74,222,128,0.12)',
+                            border: '1px solid rgba(74,222,128,0.3)',
+                            borderRadius: 8, padding: '4px 10px',
+                            fontSize: '0.72rem', color: '#4ade80', fontWeight: 600,
+                          }}>
+                            R$ 15 de desconto
+                          </span>
+                          <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', marginTop: 6, lineHeight: 1.4 }}>
+                            Valor final confirmado<br />no próximo passo
+                          </p>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
