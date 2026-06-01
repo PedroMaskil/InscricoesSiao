@@ -42,7 +42,7 @@ export default function CaravanaPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#080612', fontFamily: 'Outfit, sans-serif' }}>
+    <main style={{ minHeight: '100vh', background: '#13101f', fontFamily: 'Outfit, sans-serif' }}>
 
       {/* ── HERO ── */}
       <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
@@ -59,7 +59,7 @@ export default function CaravanaPage() {
             opacity: 0.55,
           }}
         />
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,6,18,0.6)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(19,16,31,0.6)' }} />
 
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 0' }}>
           <img
@@ -74,7 +74,7 @@ export default function CaravanaPage() {
           />
           <div style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
-            background: 'linear-gradient(to bottom, transparent, #080612)',
+            background: 'linear-gradient(to bottom, transparent, #13101f)',
             borderRadius: '0 0 16px 16px',
           }} />
         </div>
@@ -87,7 +87,7 @@ export default function CaravanaPage() {
       </div>
 
       {/* ── DETALHES DO EVENTO ── */}
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 0' }}>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '48px 24px 0' }}>
 
         <div style={{ marginBottom: 48 }}>
           <h2 style={{ fontFamily: "'Nunito', sans-serif", fontSize: '2.2rem', fontWeight: 900, color: '#fff', marginBottom: 4, letterSpacing: '-0.01em' }}>
@@ -123,6 +123,68 @@ export default function CaravanaPage() {
           </div>
         </div>
 
+        {/* ── SOBRE O EVENTO ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 40 }}>
+        <div style={{
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 16, padding: '28px 28px',
+        }}>
+          <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.3rem', fontWeight: 700, color: '#fff', marginBottom: 20 }}>
+            INFORMAÇÕES SOBRE O EVENTO
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, fontSize: '0.9rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.7 }}>
+            {(() => {
+              const hl = (word: string) => <span style={{ color: '#c084fc', fontWeight: 600 }}>{word}</span>
+              return <>
+                <p><span style={{ color: '#c084fc', fontWeight: 600 }}>LIGHTHOUSE</span> é a Conferência de Jovens e Adolescentes da Igreja Batista Sião de Maringá, que acontecerá nos dias 25, 26 e 27 de Junho.</p>
+                <p>Nossa missão como ministério é clara - {hl('ALCANÇAR')}, {hl('DISCIPULAR')} e {hl('ENVIAR')} jovens para viverem suas vocações, a partir da igreja local, para a Glória de Deus. Nessa conferência nosso foco é um: {hl('ENVIAR')}.</p>
+                <p>Somos uma geração que não foi chamada para se esconder, mas para brilhar, como um {hl('FAROL')}.</p>
+                <p>Essa é a nossa {hl('IDENTIDADE')}, esse é o nosso {hl('CHAMADO')}.</p>
+                <p>Não fomos levantados por acaso, fomos posicionados como faróis: firmes e constantes, apontando para uma direção - {hl('VERDADE')} e {hl('VIDA')}.</p>
+                <p>Somos uma geração que entende que foi enviada para {hl('TRANSFORMAR')} ambientes, {hl('INFLUENCIAR')} pessoas, carregando aquilo que recebeu, {hl('CRISTO')}.</p>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16, marginTop: 4 }}>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Não existimos para assistir.</p>
+                  <p style={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}> {hl('EXISTIMOS PARA IR')}.</p>
+                </div>
+              </>
+            })()}
+          </div>
+        </div>
+
+        <div style={{
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 16, padding: '28px 28px',
+        }}>
+          <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.3rem', fontWeight: 700, color: '#fff', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ color: '#c084fc', display: 'flex' }}><ClipboardList size={18} /></span>
+            Programação:
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {[
+              { sessao: 'Sessão 1', detalhe: 'dia 25, quinta-feira às 20h.' },
+              { sessao: 'Sessão 2', detalhe: 'dia 26, sexta-feira às 20h.' },
+              { sessao: 'Sessão 3', detalhe: 'dia 27, sábado às 16h.' },
+              { sessao: 'Sessão 4', detalhe: 'dia 27, sábado (horário em breve).' },
+            ].map((s, i, arr) => (
+              <div key={s.sessao}>
+                <div style={{ display: 'flex', gap: 8, fontSize: '0.9rem', padding: '10px 0' }}>
+                  <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>{s.sessao}:</span>
+                  <span style={{ color: 'rgba(255,255,255,0.65)' }}>{s.detalhe}</span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)', paddingBottom: 10, paddingLeft: 2 }}>
+                  <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Preletor:</span>{' '}Em breve
+                </div>
+                {i < arr.length - 1 && (
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        </div>{/* fim grid */}
+
         {/* Contato */}
         <div style={{ marginBottom: 56, display: 'flex', alignItems: 'center', gap: 10 }}>
           <Phone size={15} color="#c084fc" style={{ flexShrink: 0 }} />
@@ -138,7 +200,7 @@ export default function CaravanaPage() {
       </div>
 
       {/* ── FORMULÁRIO ── */}
-      <div style={{ background: '#0a0815', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px 80px' }}>
+      <div style={{ background: '#171222', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '56px 24px 80px' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
 
           <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, marginBottom: 8, color: '#fff', textAlign: 'center' }}>

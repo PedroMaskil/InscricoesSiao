@@ -98,7 +98,7 @@ export default async function SuccessPage({
         position: 'absolute', inset: 0, width: '100%', height: '100%',
         objectFit: 'cover', filter: 'blur(5px)', transform: 'scale(1.08)',
       }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,6,18,0.55)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(19,16,31,0.55)' }} />
       <div style={{
         position: 'relative', zIndex: 1,
         maxWidth: 550, width: '100%', textAlign: 'center',

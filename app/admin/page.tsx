@@ -245,7 +245,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', background: '#080612', fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
+    <main style={{ minHeight: '100vh', background: '#13101f', fontFamily: 'Outfit, sans-serif', color: '#fff' }}>
 
       {/* Header */}
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
@@ -293,7 +293,7 @@ export default function AdminPage() {
           { label: 'Individuais',        value: individuals.length,                     sub: `${individualsChecked} fizeram check-in` },
           { label: 'Total geral',        value: individuals.length + caravans.length,   sub: 'inscrições' },
         ].map(s => (
-          <div key={s.label} style={{ background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 20px' }}>
+          <div key={s.label} style={{ background: '#1a1528', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 20px' }}>
             <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{s.label}</p>
             <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, lineHeight: 1, marginBottom: 4 }}>{s.value}</p>
             <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>{s.sub}</p>
@@ -306,7 +306,7 @@ export default function AdminPage() {
         <input
           type="text" placeholder="Buscar por nome, cidade, CPF..."
           value={search} onChange={e => setSearch(e.target.value)}
-          style={{ flex: 1, minWidth: 200, background: '#0f0a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', color: '#fff', fontFamily: 'Outfit, sans-serif', fontSize: '0.88rem', outline: 'none' }}
+          style={{ flex: 1, minWidth: 200, background: '#1a1528', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', color: '#fff', fontFamily: 'Outfit, sans-serif', fontSize: '0.88rem', outline: 'none' }}
         />
         <div style={{ display: 'flex', gap: 8 }}>
           {(['caravans', 'individuals'] as const).map(t => (
@@ -498,7 +498,7 @@ export default function AdminPage() {
 
       {/* Scanner Modal fullscreen */}
       {scannerOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#080612', display: 'flex', flexDirection: 'column', fontFamily: 'Outfit, sans-serif' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: '#13101f', display: 'flex', flexDirection: 'column', fontFamily: 'Outfit, sans-serif' }}>
           <canvas ref={canvasRef} style={{ display: 'none' }} />
 
           {/* Topo */}
@@ -526,13 +526,13 @@ export default function AdminPage() {
             {/* Mira */}
             {scanning && !scanResult && !checkinDone && (
               <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '60%', maxWidth: 280, aspectRatio: '1', border: '2px solid #c084fc', borderRadius: 20, boxShadow: '0 0 0 9999px rgba(8,6,18,0.55)' }} />
+                <div style={{ width: '60%', maxWidth: 280, aspectRatio: '1', border: '2px solid #c084fc', borderRadius: 20, boxShadow: '0 0 0 9999px rgba(19,16,31,0.55)' }} />
               </div>
             )}
 
             {/* Overlay — check-in confirmado */}
             {checkinDone && (
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,6,18,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(19,16,31,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                 <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(79,200,120,0.15)', border: '2px solid rgba(79,200,120,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.2rem', color: '#4fc878' }}>✓</div>
                 <p style={{ color: '#4fc878', fontWeight: 700, fontSize: '1.3rem' }}>Check-in confirmado!</p>
                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>Continuando em instantes...</p>
@@ -541,7 +541,7 @@ export default function AdminPage() {
 
             {/* Overlay — inscrito encontrado */}
             {scanResult && !checkinDone && (
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(8,6,18,0.98) 75%, transparent)', padding: '40px 24px 32px' }}>
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(19,16,31,0.98) 75%, transparent)', padding: '40px 24px 32px' }}>
                 <p style={{ fontSize: '0.68rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Inscrito encontrado</p>
                 <p style={{ fontWeight: 700, fontSize: '1.4rem', marginBottom: 8, color: '#fff' }}>{scanResult.name}</p>
                 <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
@@ -600,7 +600,7 @@ export default function AdminPage() {
           onClick={() => setPdfModal(null)}
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
         >
-          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 800, height: '80vh', background: '#0f0a1a', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 800, height: '80vh', background: '#1a1528', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>Lista de participantes</p>
               <div style={{ display: 'flex', gap: 10 }}>

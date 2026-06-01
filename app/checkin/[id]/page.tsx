@@ -48,10 +48,10 @@ export default function CheckinPage() {
   return (
     <main style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 24, background: '#080612', fontFamily: 'Outfit, sans-serif', color: '#fff',
+      padding: 24, background: '#13101f', fontFamily: 'Outfit, sans-serif', color: '#fff',
     }}>
       <div style={{
-        maxWidth: 440, width: '100%', background: '#0f0a1a',
+        maxWidth: 440, width: '100%', background: '#1a1528',
         border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '40px 32px',
         textAlign: 'center',
       }}>

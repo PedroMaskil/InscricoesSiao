@@ -8,9 +8,9 @@
   --accent: #7c3aed;
   --accent-2: #9333ea;
   --accent-light: #c084fc;
-  --dark: #080612;
-  --dark-2: #0f0a1a;
-  --dark-3: #160e2a;
+  --dark: #13101f;
+  --dark-2: #1a1528;
+  --dark-3: #231b38;
   --cream: #f2ede4;
   --muted: #7a7a7a;
   --border: rgba(124,58,237,0.22);
@@ -56,7 +56,7 @@ h1, h2, h3 {
   position: absolute;
   left: 5px; top: 2px;
   width: 6px; height: 10px;
-  border: 2px solid #080612;
+  border: 2px solid #13101f;
   border-top: none; border-left: none;
   transform: rotate(45deg);
 }
@@ -87,7 +87,7 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
 }
 input[type="number"] { -moz-appearance: textfield; }
-select option { background: #160e2a; }
+select option { background: #231b38; }
 
 label.field-label {
   display: block;
