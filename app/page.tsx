@@ -252,7 +252,7 @@ export default function RegistrationPage() {
               { sessao: 'Sessão 1', detalhe: 'dia 25, quinta-feira às 20h.' },
               { sessao: 'Sessão 2', detalhe: 'dia 26, sexta-feira às 20h.' },
               { sessao: 'Sessão 3', detalhe: 'dia 27, sábado às 16h.' },
-              { sessao: 'Sessão 4', detalhe: 'dia 27, sábado (horário em breve).' },
+              { sessao: 'Sessão 4', detalhe: 'dia 27, sábado às 19h.' },
             ].map((s, i, arr) => (
               <div key={s.sessao}>
                 <div style={{ display: 'flex', gap: 8, fontSize: '0.9rem', padding: '10px 0' }}>
