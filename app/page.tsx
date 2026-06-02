@@ -69,14 +69,6 @@ export default function RegistrationPage() {
   const [error, setError]                 = useState('')
   const [showForm, setShowForm]           = useState(false)
 
-  // ── SESSÕES com preletor editável por linha ──
-  const [sessions, setSessions] = useState([
-    { sessao: 'Sessão 1', detalhe: 'dia 25, quinta-feira às 20h.', preletor: '' },
-    { sessao: 'Sessão 2', detalhe: 'dia 26, sexta-feira às 20h.', preletor: '' },
-    { sessao: 'Sessão 3', detalhe: 'dia 27, sábado às 16h.',      preletor: '' },
-    { sessao: 'Sessão 4', detalhe: 'dia 27, sábado às 19h.',      preletor: '' },
-  ])
-
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>()
   const watchedCep = watch('cep', '')
 
@@ -255,43 +247,55 @@ export default function RegistrationPage() {
             <span style={{ color: '#c084fc', display: 'flex' }}><ClipboardList size={18} /></span>
             Programação:
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {sessions.map((s, i, arr) => (
-              <div key={s.sessao}>
-                <div style={{ display: 'flex', gap: 8, fontSize: '0.9rem', padding: '10px 0' }}>
-                  <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>{s.sessao}:</span>
-                  <span style={{ color: 'rgba(255,255,255,0.65)' }}>{s.detalhe}</span>
-                </div>
-                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)', paddingBottom: 10, paddingLeft: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500, flexShrink: 0 }}>Preletor:</span>{' '}
-                  <input
-                    type="text"
-                    value={s.preletor}
-                    onChange={(e) => {
-                      const updated = [...sessions]
-                      updated[i] = { ...updated[i], preletor: e.target.value }
-                      setSessions(updated)
-                    }}
-                    placeholder="Em breve"
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      borderBottom: '1px solid rgba(192,132,252,0.2)',
-                      color: s.preletor ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.25)',
-                      fontSize: '0.78rem',
-                      fontFamily: 'Outfit, sans-serif',
-                      outline: 'none',
-                      width: 180,
-                      padding: '0 2px 1px',
-                    }}
-                  />
-                </div>
-                {i < arr.length - 1 && (
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
-                )}
-              </div>
-            ))}
-          </div>
+<div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+  <div>
+    <div style={{ display: 'flex', gap: 8, fontSize: '0.9rem', padding: '10px 0' }}>
+      <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>Sessão 1:</span>
+      <span style={{ color: 'rgba(255,255,255,0.65)' }}>dia 25, quinta-feira às 20h.</span>
+    </div>
+    <div style={{ fontSize: '0.78rem', paddingBottom: 10, paddingLeft: 2 }}>
+      <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Adlin Rodrigues + Pedro Vuks</span>
+    </div>
+    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+  </div>
+
+  <div>
+    <div style={{ display: 'flex', gap: 8, fontSize: '0.9rem', padding: '10px 0' }}>
+      <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>Sessão 2:</span>
+      <span style={{ color: 'rgba(255,255,255,0.65)' }}>dia 26, sexta-feira às 20h.</span>
+    </div>
+    <div style={{ fontSize: '0.78rem', paddingBottom: 10, paddingLeft: 2 }}>
+      <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Preletor:</span>
+      {' '}<span style={{ color: 'rgba(255,255,255,0.3)' }}>Em breve</span>
+    </div>
+    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+  </div>
+
+  <div>
+    <div style={{ display: 'flex', gap: 8, fontSize: '0.9rem', padding: '10px 0' }}>
+      <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>Sessão 3:</span>
+      <span style={{ color: 'rgba(255,255,255,0.65)' }}>dia 27, sábado às 16h.</span>
+    </div>
+    <div style={{ fontSize: '0.78rem', paddingBottom: 10, paddingLeft: 2 }}>
+      <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Preletor:</span>
+      {' '}<span style={{ color: 'rgba(255,255,255,0.3)' }}>Em breve</span>
+    </div>
+    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+  </div>
+
+  <div>
+    <div style={{ display: 'flex', gap: 8, fontSize: '0.9rem', padding: '10px 0' }}>
+      <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>Sessão 4:</span>
+      <span style={{ color: 'rgba(255,255,255,0.65)' }}>dia 27, sábado às 19h.</span>
+    </div>
+    <div style={{ fontSize: '0.78rem', paddingBottom: 10, paddingLeft: 2 }}>
+      <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Preletor:</span>
+      {' '}<span style={{ color: 'rgba(255,255,255,0.3)' }}>Em breve</span>
+    </div>
+  </div>
+
+</div>
         </div>
 
         </div>{/* fim grid */}
