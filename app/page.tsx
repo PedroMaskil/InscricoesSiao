@@ -254,7 +254,7 @@ export default function RegistrationPage() {
       <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>Sessão 1:</span>
       <span style={{ color: 'rgba(255,255,255,0.65)' }}>dia 25, quinta-feira às 20h.</span>
     </div>
-    <div style={{ fontSize: '0.78rem', paddingBottom: 10, paddingLeft: 2 }}>
+    <div style={{ fontSize: '0.9rem', paddingBottom: 10, paddingLeft: 2 }}>
       <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Adlin Rodrigues + Pedro Vuks</span>
     </div>
     <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
@@ -265,7 +265,7 @@ export default function RegistrationPage() {
       <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>Sessão 2:</span>
       <span style={{ color: 'rgba(255,255,255,0.65)' }}>dia 26, sexta-feira às 20h.</span>
     </div>
-    <div style={{ fontSize: '0.78rem', paddingBottom: 10, paddingLeft: 2 }}>
+    <div style={{ fontSize: '0.9rem', paddingBottom: 10, paddingLeft: 2 }}>
       <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Preletor:</span>
       {' '}<span style={{ color: 'rgba(255,255,255,0.3)' }}>Em breve</span>
     </div>
@@ -277,7 +277,7 @@ export default function RegistrationPage() {
       <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>Sessão 3:</span>
       <span style={{ color: 'rgba(255,255,255,0.65)' }}>dia 27, sábado às 16h.</span>
     </div>
-    <div style={{ fontSize: '0.78rem', paddingBottom: 10, paddingLeft: 2 }}>
+    <div style={{ fontSize: '0.9rem', paddingBottom: 10, paddingLeft: 2 }}>
       <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Preletor:</span>
       {' '}<span style={{ color: 'rgba(255,255,255,0.3)' }}>Em breve</span>
     </div>
@@ -289,7 +289,7 @@ export default function RegistrationPage() {
       <span style={{ color: '#c084fc', fontWeight: 600, flexShrink: 0 }}>Sessão 4:</span>
       <span style={{ color: 'rgba(255,255,255,0.65)' }}>dia 27, sábado às 19h.</span>
     </div>
-    <div style={{ fontSize: '0.78rem', paddingBottom: 10, paddingLeft: 2 }}>
+    <div style={{ fontSize: '0.9rem', paddingBottom: 10, paddingLeft: 2 }}>
       <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Preletor:</span>
       {' '}<span style={{ color: 'rgba(255,255,255,0.3)' }}>Em breve</span>
     </div>
