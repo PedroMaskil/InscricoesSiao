@@ -45,11 +45,8 @@ export async function PATCH(req: NextRequest) {
 export async function GET() {
   try {
     const [caravans, individuals] = await Promise.all([
-      prisma.caravan.findMany({ orderBy: { createdAt: 'asc' } }),
-      prisma.registration.findMany({
-        where: { status: 'confirmed' },
-        orderBy: { createdAt: 'asc' },
-      }),
+      prisma.caravan.findMany({ where: { status: 'confirmed' }, orderBy: { createdAt: 'asc' } }),
+      prisma.registration.findMany({ where: { status: 'confirmed' }, orderBy: { createdAt: 'asc' } }),
     ])
     return NextResponse.json({ caravans, individuals })
   } catch (err: any) {

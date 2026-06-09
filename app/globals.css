@@ -104,3 +104,34 @@ label.field-label {
   color: #e57373;
   margin-top: 5px;
 }
+
+.tabs-row {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .tabs-row {
+    justify-content: center;
+  }
+}
+
+.admin-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .admin-header-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .admin-header-actions .checkin-btn,
+  .admin-header-actions .send-all-btn {
+    grid-column: 1 / -1;
+  }
+}

@@ -63,7 +63,7 @@ export default async function CaravanSuccessPage({
   if (caravanId) {
     caravan = await prisma.caravan.findUnique({ where: { id: caravanId } })
 
-    if (caravan) {
+    if (caravan && caravan.status === 'confirmed') {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://inscricoes.batistasiao.org.br'
         qrDataUrl = await QRCode.toDataURL(`${baseUrl}/caravana/sucesso?caravan_id=${caravanId}`, {
@@ -74,26 +74,79 @@ export default async function CaravanSuccessPage({
     }
   }
 
-  const valor = caravan
-    ? (caravan.amount / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-    : null
+  const bgStyle: React.CSSProperties = {
+    minHeight: '100vh', display: 'flex', alignItems: 'center',
+    justifyContent: 'center', padding: 24, position: 'relative', overflow: 'hidden',
+  }
 
-  return (
-    <main style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', padding: 24, position: 'relative', overflow: 'hidden',
-    }}>
+  const bgImg = (
+    <>
       <img src="/banner.jpeg" aria-hidden="true" style={{
         position: 'absolute', inset: 0, width: '100%', height: '100%',
         objectFit: 'cover', filter: 'blur(5px)', transform: 'scale(1.08)',
       }} />
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,6,18,0.55)' }} />
-      <div style={{
-        position: 'relative', zIndex: 1,
-        maxWidth: 560, width: '100%', textAlign: 'center',
-        background: 'var(--dark-2)', border: '1px solid var(--border)',
-        borderRadius: 20, padding: '48px 40px',
-      }}>
+    </>
+  )
+
+  const cardStyle: React.CSSProperties = {
+    position: 'relative', zIndex: 1,
+    maxWidth: 560, width: '100%', textAlign: 'center',
+    background: 'var(--dark-2)', border: '1px solid var(--border)',
+    borderRadius: 20, padding: '48px 40px',
+  }
+
+  if (!caravan || caravan.status !== 'confirmed') {
+    return (
+      <main style={bgStyle}>
+        {bgImg}
+        <div style={cardStyle}>
+          <div style={{
+            width: 80, height: 80, borderRadius: '50%',
+            background: 'rgba(250,180,50,0.1)',
+            border: '2px solid rgba(250,180,50,0.35)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 24px', fontSize: '2.4rem', color: '#fab432',
+          }}>
+            ⏳
+          </div>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 700, marginBottom: 12 }}>
+            Pagamento pendente
+          </h1>
+          <p style={{ color: 'var(--muted)', lineHeight: 1.8, marginBottom: 4 }}>
+            Seu pagamento ainda não foi confirmado.
+          </p>
+          <p style={{ color: 'var(--muted)', lineHeight: 1.7, marginBottom: 28 }}>
+            Se você já realizou o pagamento, aguarde alguns minutos e recarregue esta página. Em caso de dúvidas, entre em contato.
+          </p>
+          <div style={{
+            background: 'rgba(201,168,76,0.07)',
+            border: '1px solid rgba(201,168,76,0.2)',
+            borderRadius: 12, padding: '16px 20px',
+            fontSize: '0.85rem', color: 'var(--cream)', lineHeight: 1.6,
+          }}>
+            Dúvidas? Fale conosco pelo Instagram ou WhatsApp.<br />
+            <a href="https://www.instagram.com/vetormaringa?igsh=ang5dTRqYmQxa25i" target="_blank" rel="noreferrer"
+              style={{ color: '#c084fc', fontWeight: 600, textDecoration: 'none' }}>
+              @vetormaringa
+            </a>
+            {' '}·{' '}
+            <a href="https://wa.me/5544999605447" target="_blank" rel="noreferrer"
+              style={{ color: '#c084fc', fontWeight: 600, textDecoration: 'none' }}>
+              (44) 99960-5447
+            </a>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  const valor = (caravan.amount / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+  return (
+    <main style={bgStyle}>
+      {bgImg}
+      <div style={cardStyle}>
         <div style={{
           width: 80, height: 80, borderRadius: '50%',
           background: 'rgba(79,200,120,0.12)',
