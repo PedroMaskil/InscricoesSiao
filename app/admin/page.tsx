@@ -324,40 +324,34 @@ export default function InscritsPage() {
 
                 {/* Dados principais */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 2 }}>
-                        <p style={{ fontWeight: 700, fontSize: '0.97rem' }}>{i.name}</p>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 600, borderRadius: 100, padding: '2px 10px', background: 'rgba(79,200,120,0.12)', color: '#4fc878', border: '1px solid rgba(79,200,120,0.3)' }}>
-                          Pago
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)' }}>CPF: {i.cpf}</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                      <span style={{ background: 'rgba(79,200,120,0.12)', borderRadius: 100, padding: '3px 12px', fontSize: '0.82rem', color: '#4fc878', fontWeight: 700 }}>
-                        {fmtCurrency(i.amount)}
-                      </span>
-                      {/* Reenviar e-mail */}
-                      <button
-                        onClick={() => resendEmail(i.id)}
-                        disabled={!!emailStatus[i.id]}
-                        title="Reenviar e-mail com QR Code"
-                        style={{
-                          width: 32, height: 32, borderRadius: 8, border: 'none',
-                          cursor: emailStatus[i.id] ? 'default' : 'pointer',
-                          fontSize: '0.82rem', flexShrink: 0,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          transition: 'all 0.2s',
-                          fontFamily: 'Outfit, sans-serif',
-                          background: emailStatus[i.id] === 'sent' ? 'rgba(79,200,120,0.15)' : emailStatus[i.id] === 'error' ? 'rgba(248,113,113,0.15)' : 'rgba(192,132,252,0.1)',
-                          color: emailStatus[i.id] === 'sent' ? '#4fc878' : emailStatus[i.id] === 'error' ? '#f87171' : '#c084fc',
-                        }}
-                      >
-                        {emailStatus[i.id] === 'sending' ? '…' : emailStatus[i.id] === 'sent' ? '✓' : emailStatus[i.id] === 'error' ? '✗' : '✉'}
-                      </button>
-                    </div>
+                  {/* Linha 1: nome + valor + email btn */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                    <p style={{ fontWeight: 700, fontSize: '0.97rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{i.name}</p>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 600, borderRadius: 100, padding: '2px 10px', background: 'rgba(79,200,120,0.12)', color: '#4fc878', border: '1px solid rgba(79,200,120,0.3)', flexShrink: 0 }}>
+                      Pago
+                    </span>
+                    <span style={{ background: 'rgba(79,200,120,0.12)', borderRadius: 100, padding: '3px 12px', fontSize: '0.82rem', color: '#4fc878', fontWeight: 700, flexShrink: 0 }}>
+                      {fmtCurrency(i.amount)}
+                    </span>
+                    <button
+                      onClick={() => resendEmail(i.id)}
+                      disabled={!!emailStatus[i.id]}
+                      title="Reenviar e-mail com QR Code"
+                      style={{
+                        width: 32, height: 32, borderRadius: 8, border: 'none', flexShrink: 0,
+                        cursor: emailStatus[i.id] ? 'default' : 'pointer',
+                        fontSize: '0.82rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        transition: 'all 0.2s', fontFamily: 'Outfit, sans-serif',
+                        background: emailStatus[i.id] === 'sent' ? 'rgba(79,200,120,0.15)' : emailStatus[i.id] === 'error' ? 'rgba(248,113,113,0.15)' : 'rgba(192,132,252,0.1)',
+                        color: emailStatus[i.id] === 'sent' ? '#4fc878' : emailStatus[i.id] === 'error' ? '#f87171' : '#c084fc',
+                      }}
+                    >
+                      {emailStatus[i.id] === 'sending' ? '…' : emailStatus[i.id] === 'sent' ? '✓' : emailStatus[i.id] === 'error' ? '✗' : '✉'}
+                    </button>
                   </div>
+
+                  <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>CPF: {i.cpf}</p>
 
                   <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
                     {i.email} · {i.phone}{i.city ? ` · ${i.city}` : ''}
