@@ -10,7 +10,12 @@ type PendingCaravan = {
 
 type PendingIndividual = {
   id: string; name: string; email: string; phone: string; cpf: string
-  city: string | null; priceTier: string; amount: number; createdAt: string
+  city: string | null; isOtherMember: boolean; otherChurch: string | null
+  source: string | null; priceTier: string; amount: number; createdAt: string
+}
+
+const SOURCE_LABELS: Record<string, string> = {
+  instagram: 'Instagram', indicacao: 'Indicação', whatsapp: 'WhatsApp', outro: 'Outro',
 }
 
 const TIER_LABELS: Record<string, string> = {
@@ -218,6 +223,16 @@ export default function PendentesPage() {
                         ))
                       : <span style={{ fontSize: '0.73rem', color: 'rgba(255,255,255,0.35)' }}>{getTierLabel(i.priceTier)}</span>
                     }
+                    {i.isOtherMember && (
+                      <span style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 6, padding: '2px 9px', fontSize: '0.72rem', color: '#fbbf24', fontWeight: 600 }}>
+                        {i.otherChurch ? `Igreja: ${i.otherChurch}` : 'Outra igreja'}
+                      </span>
+                    )}
+                    {i.source && (
+                      <span style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '2px 9px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)' }}>
+                        via {SOURCE_LABELS[i.source] ?? i.source}
+                      </span>
+                    )}
                     <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)' }}>
                       · Iniciou {timeAgo(i.createdAt)}
                     </span>

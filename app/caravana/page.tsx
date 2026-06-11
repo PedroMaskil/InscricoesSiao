@@ -181,8 +181,7 @@ export default function CaravanaPage() {
       <span style={{ color: 'rgba(255,255,255,0.65)' }}>dia 26, sexta-feira às 20h.</span>
     </div>
     <div style={{ fontSize: '0.9rem', paddingBottom: 10, paddingLeft: 2 }}>
-      <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Preletor:</span>
-      {' '}<span style={{ color: 'rgba(255,255,255,0.3)' }}>Em breve</span>
+      <span style={{ color: 'rgba(192,132,252,0.5)', fontWeight: 500 }}>Davi Jardim</span>
     </div>
     <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
   </div>

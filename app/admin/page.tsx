@@ -14,11 +14,16 @@ type Caravan = {
 
 type Individual = {
   id: string; name: string; email: string; phone: string; cpf: string
-  city: string | null; isMember: boolean; priceTier: string; amount: number
+  city: string | null; isMember: boolean; isOtherMember: boolean; otherChurch: string | null
+  source: string | null; priceTier: string; amount: number
   status: string; paidAt: string | null; checkedIn: boolean; checkedInAt: string | null; createdAt: string
 }
 
 const DAY_LABEL: Record<string, string> = { quinta: 'Quinta', sexta: 'Sexta', sabado: 'Sábado', quinta_sexta: 'Qui + Sex' }
+
+const SOURCE_LABELS: Record<string, string> = {
+  instagram: 'Instagram', indicacao: 'Indicação', whatsapp: 'WhatsApp', outro: 'Outro',
+}
 
 const TIER_LABELS: Record<string, string> = {
   outside: 'Fora de Maringá', local: 'Maringá',
@@ -369,6 +374,16 @@ export default function InscritsPage() {
                     {i.isMember && (
                       <span style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 6, padding: '2px 9px', fontSize: '0.72rem', color: '#c084fc', fontWeight: 600 }}>
                         Membro
+                      </span>
+                    )}
+                    {i.isOtherMember && (
+                      <span style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 6, padding: '2px 9px', fontSize: '0.72rem', color: '#fbbf24', fontWeight: 600 }}>
+                        {i.otherChurch ? `Igreja: ${i.otherChurch}` : 'Outra igreja'}
+                      </span>
+                    )}
+                    {i.source && (
+                      <span style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '2px 9px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)' }}>
+                        via {SOURCE_LABELS[i.source] ?? i.source}
                       </span>
                     )}
                     <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', marginLeft: 2 }}>
