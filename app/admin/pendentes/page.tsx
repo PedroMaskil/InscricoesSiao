@@ -65,6 +65,25 @@ export default function PendentesPage() {
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  const [confirmStatus, setConfirmStatus] = useState<Record<string, 'loading' | 'done' | 'error'>>({})
+
+  const handleConfirm = async (id: string, type: 'individual' | 'caravan') => {
+    setConfirmStatus(prev => ({ ...prev, [id]: 'loading' }))
+    try {
+      const res  = await fetch('/api/pendentes', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ id, type }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setConfirmStatus(prev => ({ ...prev, [id]: 'done' }))
+      setTimeout(() => fetchData(), 1500)
+    } catch {
+      setConfirmStatus(prev => ({ ...prev, [id]: 'error' }))
+      setTimeout(() => setConfirmStatus(prev => { const n = { ...prev }; delete n[id]; return n }), 3000)
+    }
+  }
 
   useEffect(() => { fetchData() }, [])
 
@@ -239,12 +258,28 @@ export default function PendentesPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => openDelete(i.id, 'individual', i.name)}
-                  style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 8, padding: '6px 12px', color: '#f87171', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', flexShrink: 0 }}
-                >
-                  Excluir
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+                  <button
+                    onClick={() => handleConfirm(i.id, 'individual')}
+                    disabled={!!confirmStatus[i.id]}
+                    style={{
+                      background: confirmStatus[i.id] === 'done' ? 'rgba(79,200,120,0.15)' : confirmStatus[i.id] === 'error' ? 'rgba(248,113,113,0.15)' : 'rgba(79,200,120,0.1)',
+                      border: `1px solid ${confirmStatus[i.id] === 'done' ? 'rgba(79,200,120,0.4)' : confirmStatus[i.id] === 'error' ? 'rgba(248,113,113,0.3)' : 'rgba(79,200,120,0.25)'}`,
+                      borderRadius: 8, padding: '6px 12px',
+                      color: confirmStatus[i.id] === 'done' ? '#4fc878' : confirmStatus[i.id] === 'error' ? '#f87171' : '#4fc878',
+                      fontSize: '0.75rem', cursor: confirmStatus[i.id] ? 'default' : 'pointer',
+                      fontFamily: 'Outfit, sans-serif', fontWeight: 600,
+                    }}
+                  >
+                    {confirmStatus[i.id] === 'loading' ? '...' : confirmStatus[i.id] === 'done' ? '✓ Confirmado' : confirmStatus[i.id] === 'error' ? '✗ Erro' : '✓ Confirmar pago'}
+                  </button>
+                  <button
+                    onClick={() => openDelete(i.id, 'individual', i.name)}
+                    style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 8, padding: '6px 12px', color: '#f87171', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -288,12 +323,28 @@ export default function PendentesPage() {
                       <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>em aberto</p>
                     </div>
                   )}
-                  <button
-                    onClick={() => openDelete(c.id, 'caravan', `${c.church} — ${c.city}`)}
-                    style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 8, padding: '6px 12px', color: '#f87171', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', flexShrink: 0 }}
-                  >
-                    Excluir
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <button
+                      onClick={() => handleConfirm(c.id, 'caravan')}
+                      disabled={!!confirmStatus[c.id]}
+                      style={{
+                        background: confirmStatus[c.id] === 'done' ? 'rgba(79,200,120,0.15)' : confirmStatus[c.id] === 'error' ? 'rgba(248,113,113,0.15)' : 'rgba(79,200,120,0.1)',
+                        border: `1px solid ${confirmStatus[c.id] === 'done' ? 'rgba(79,200,120,0.4)' : confirmStatus[c.id] === 'error' ? 'rgba(248,113,113,0.3)' : 'rgba(79,200,120,0.25)'}`,
+                        borderRadius: 8, padding: '6px 12px',
+                        color: confirmStatus[c.id] === 'done' ? '#4fc878' : confirmStatus[c.id] === 'error' ? '#f87171' : '#4fc878',
+                        fontSize: '0.75rem', cursor: confirmStatus[c.id] ? 'default' : 'pointer',
+                        fontFamily: 'Outfit, sans-serif', fontWeight: 600,
+                      }}
+                    >
+                      {confirmStatus[c.id] === 'loading' ? '...' : confirmStatus[c.id] === 'done' ? '✓ Confirmado' : confirmStatus[c.id] === 'error' ? '✗ Erro' : '✓ Confirmar pago'}
+                    </button>
+                    <button
+                      onClick={() => openDelete(c.id, 'caravan', `${c.church} — ${c.city}`)}
+                      style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 8, padding: '6px 12px', color: '#f87171', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' }}
+                    >
+                      Excluir
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
