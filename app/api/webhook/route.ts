@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendConfirmationEmail, sendCaravanConfirmationEmail } from '@/lib/email'
+import { sendConfirmationEmail, sendCaravanConfirmationEmail, sendCaravanAdditionEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +11,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing order_nsu' }, { status: 400 })
     }
 
-    if (order_nsu.startsWith('caravan_')) {
+    if (order_nsu.startsWith('caravan_addition_')) {
+      const additionId = order_nsu.replace('caravan_addition_', '')
+
+      const addition = await prisma.caravanAddition.update({
+        where: { id: additionId },
+        data: { status: 'confirmed', invoiceSlug: invoice_slug ?? null, paidAt: new Date() },
+      })
+
+      const updateData: Parameters<typeof prisma.caravan.update>[0]['data'] = {
+        peopleCount: { increment: addition.peopleCount },
+        amount:      { increment: addition.amount },
+      }
+      if (addition.listFileUrl) {
+        updateData.listFileUrl  = addition.listFileUrl
+        updateData.listFileName = addition.listFileName
+      }
+
+      const caravan = await prisma.caravan.update({
+        where: { id: addition.caravanId },
+        data:  updateData,
+      })
+
+      if (caravan.leaderEmail) {
+        await sendCaravanAdditionEmail({
+          caravanId:    caravan.id,
+          leader:       caravan.leader,
+          email:        caravan.leaderEmail,
+          city:         caravan.city,
+          church:       caravan.church,
+          addedPeople:  addition.peopleCount,
+          totalPeople:  caravan.peopleCount,
+          addedAmount:  addition.amount,
+        }).catch(err => console.error('Addition email error:', err))
+      }
+
+    } else if (order_nsu.startsWith('caravan_')) {
       const caravanId = order_nsu.replace('caravan_', '')
 
       const caravan = await prisma.caravan.update({

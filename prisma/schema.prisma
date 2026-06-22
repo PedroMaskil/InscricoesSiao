@@ -42,26 +42,44 @@ model Registration {
 }
 
 model Caravan {
-  id           String    @id @default(uuid())
+  id           String            @id @default(uuid())
   city         String
   church       String
   leader       String
-  leaderPhone  String    @map("leader_phone")
-  leaderEmail  String?   @map("leader_email")
-  peopleCount  Int       @map("people_count")
-  amount       Int       @default(0)
-  listFileUrl  String?   @map("list_file_url")
-  listFileName String?   @map("list_file_name")
-  status       String    @default("confirmed")
-  paidAt       DateTime? @map("paid_at")
-  invoiceSlug  String?   @map("invoice_slug")
-  pixChargeId  String?   @map("pix_charge_id")
-  pixBrcode    String?   @map("pix_brcode")
-  checkedIn    Boolean   @default(false) @map("checked_in")
-  checkedInAt  DateTime? @map("checked_in_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
+  leaderPhone  String            @map("leader_phone")
+  leaderEmail  String?           @map("leader_email")
+  peopleCount  Int               @map("people_count")
+  amount       Int               @default(0)
+  listFileUrl  String?           @map("list_file_url")
+  listFileName String?           @map("list_file_name")
+  status       String            @default("confirmed")
+  paidAt       DateTime?         @map("paid_at")
+  invoiceSlug  String?           @map("invoice_slug")
+  pixChargeId  String?           @map("pix_charge_id")
+  pixBrcode    String?           @map("pix_brcode")
+  checkedIn    Boolean           @default(false) @map("checked_in")
+  checkedInAt  DateTime?         @map("checked_in_at")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  additions    CaravanAddition[]
 
   @@index([city])
   @@index([status])
   @@map("caravans")
+}
+
+model CaravanAddition {
+  id           String    @id @default(uuid())
+  caravanId    String    @map("caravan_id")
+  caravan      Caravan   @relation(fields: [caravanId], references: [id])
+  peopleCount  Int       @map("people_count")
+  amount       Int
+  status       String    @default("pending")
+  invoiceSlug  String?   @map("invoice_slug")
+  listFileUrl  String?   @map("list_file_url")
+  listFileName String?   @map("list_file_name")
+  paidAt       DateTime? @map("paid_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([caravanId])
+  @@map("caravan_additions")
 }
